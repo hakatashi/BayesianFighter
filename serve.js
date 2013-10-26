@@ -32,8 +32,14 @@ function handler(req, res) {
     else if (urlinfo.pathname === "/js/client.js") writeFromFile(req, res, "/js/client.js");
 }
 
-io.sockets.on('connection', function(client){
-	client.on('message', function(message) {
-	    console.log(JSON.stringify(message));
+//データ受信
+
+io.of('/send').on('connection', function (socket) {
+    console.log(socket.id + ': connected');
+	socket.on('info', function(message) {
+	    console.log(socket.id + ': ' + JSON.stringify(message));
+	});
+	socket.on('disconnect', function () {
+	    console.log(socket.id + ': disconnected');
 	});
 });

@@ -1,10 +1,10 @@
 $(function () {
-    var socket = io.connect('http://' + location.host);
+    var socket = io.connect('http://' + location.host + '/send');
 
     setInterval(function () {
         var message = Date();
         $('#time').text(message);
-        socket.send(message);
+        socket.emit('info', message);
         console.log(message);
     }, 1000);
 
@@ -42,7 +42,7 @@ $(function () {
         GravCirc.position = [-gravity.x * 20 + 200, gravity.y * 20 + 200];
         GravCirc.scale((gravity.z + 10.0) * 2.0 / GravCirc.bounds.width);
 
-        socket.send(gravity);
+        socket.emit('info', gravity);
 
         // 以下は一部のデバイスでしか動かない可能性あり
 
