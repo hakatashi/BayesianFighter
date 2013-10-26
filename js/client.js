@@ -32,9 +32,6 @@ $(function () {
     axisY.strokeColor = 'black';
     axisY.add([200, 0], [200, 400]);
 
-    // 画面更新
-    paper.view.onFrame = function () { };
-
     window.addEventListener('devicemotion', function (e) {
         // 重力加速度
         var gravity = e.accelerationIncludingGravity;
@@ -65,6 +62,8 @@ $(function () {
         $("#rotation").text('回転加速度: ' + rotation.x + ', ' + rotation.y + ', ' + rotation.z);
         RotCirc.position = [-rotation.x * 20 + 200, rotation.y * 20 + 200];
         RotCirc.scale((rotation.z + 10.0) * 2.0 / RotCirc.bounds.width);
+
+        paper.view.draw();
     });
 
 });

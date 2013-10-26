@@ -30,16 +30,28 @@ function handler(req, res) {
     var urlinfo = require('url').parse(req.url, true);
     if (urlinfo.pathname === "/") writeFromFile(req, res, "/index.html");
     else if (urlinfo.pathname === "/js/client.js") writeFromFile(req, res, "/js/client.js");
+    else if (urlinfo.pathname === "/monitor") writeFromFile(req, res, "/monitor.html");
+    else if (urlinfo.pathname === "/js/monitor.js") writeFromFile(req, res, "/js/monitor.js");
 }
 
 //データ受信
 
 io.of('/send').on('connection', function (socket) {
     console.log(socket.id + ': connected');
-	socket.on('info', function(message) {
-	    console.log(socket.id + ': ' + JSON.stringify(message));
-	});
-	socket.on('disconnect', function () {
-	    console.log(socket.id + ': disconnected');
-	});
+    socket.on('info', function (message) {
+        console.log(socket.id + ': ' + JSON.stringify(message));
+    });
+    socket.on('disconnect', function () {
+        console.log(socket.id + ': disconnected');
+    });
+});
+
+io.of('/monitor').on('connection', function (socket) {
+    console.log(socket.id + ': connected');
+    socket.on('info', function (message) {
+        console.log(socket.id + ': ' + JSON.stringify(message));
+    });
+    socket.on('disconnect', function () {
+        console.log(socket.id + ': disconnected');
+    });
 });
