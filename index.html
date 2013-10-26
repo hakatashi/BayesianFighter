@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/paper.js/0.9.9/paper.js"></script>
+<script type="text/javascript">
+$(function(){
+	var socket = io.connect('http://'+location.host);
+	
+	setInterval(function(){
+		var message = Date();
+		$('#time').text(message);
+		socket.send(message);
+		console.log(message);
+	},1000);
+	
+	window.addEventListener('devicemotion', function(e){
+		// 重力加速度
+		var gravity = e.accelerationIncludingGravity;
+		$("#gravity").text( '重力加速度: ' + gravity.x + ', ' + gravity.y + ', ' + gravity.z );
+		
+		// 以下は一部のデバイスでしか動かない可能性あり
+		
+		// 加速度
+		var accele = e.acceleration;
+		$("#accele").text( '加速度: ' + accele.x + ', ' + accele.y + ', ' + accele.z );
+		
+		// 回転加速度
+		var rotation = e.rotationRate;
+		$("#rotation").text( '回転加速度: ' + rotation.x + ', ' + rotation.y + ', ' + rotation.z );
+	});
+	
+});
+</script>
+<title>Komabasai Test Engine</title>
+</head>
+<body>
+<p id="time"></p>
+<p id="gravity">重力加速度:</p>
+<p id="accele">加速度:</p>
+<p id="rotation">回転加速度:</p>
+</body>
+</html>
