@@ -1,29 +1,39 @@
-var app = require('http').createServer(handle), io = require('socket.io').listen(app), fs = require('fs');
+var app = require('http').createServer(handler), io = require('socket.io').listen(app), fs = require('fs');
+
+//ファイルから読み込んでレスポンス
+var writeFromFile = function (req, res, locate) {
+    fs.readFile(__dirname + locate, function (err, data) {
+        if (err) {
+            res.writeHead(500, {
+                'Content-Type': 'text/plain'
+            });
+            res.write('Error loading ' + locate);
+            res.end();
+            console.log("not found " + locate);
+            return;
+        }
+
+        res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8'
+        });
+        res.write(data);
+        res.end();
+        console.log("served " + locate);
+    });
+};
 
 app.listen(8080);
 
-// すべてのリクエストにindex.htmlを返す
-function handle( request, response ) {
-	fs.readFile( __dirname + '/index.html', function( err, data ) {
-		if (err) {
-			response.writeHead( 500, {
-				'Content-Type': 'text/plain'
-			});
-			response.write('Error loading index.html');
-			return response.end();
-		}
+//必要なファイルを提供
 
-		response.writeHead( 200, {
-			'Content-Type': 'text/html'
-		});
-		response.write(data);
-		response.end();
-	});
+function handler(req, res) {
+    var urlinfo = require('url').parse(req.url, true);
+    if (urlinfo.pathname === "/") writeFromFile(req, res, "/index.html");
+    else if (urlinfo.pathname === "/js/client.js") writeFromFile(req, res, "/js/client.js");
 }
 
-// Socketのセットアップ
 io.sockets.on('connection', function(client){
 	client.on('message', function(message) {
-		console.log(message);
+	    console.log(JSON.stringify(message));
 	});
 });
