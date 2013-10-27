@@ -39,7 +39,7 @@ $(function () {
         GravCirc.position = [-gravity.x * 20 + 200, gravity.y * 20 + 200];
         GravCirc.scale((gravity.z + 10.0) * 2.0 / GravCirc.bounds.width);
 
-        socket.emit('info', gravity);
+        //socket.emit('info', gravity);
 
         // 以下は一部のデバイスでしか動かない可能性あり
 
@@ -66,4 +66,16 @@ $(function () {
         paper.view.draw();
     });
 
+    $("#emerge").click(function () {
+        socket.emit('emerge');
+        var onResponce = function (message) {
+            if (message) {
+                $("#res").html($("#res").html() + '<br>Request Accepted.');
+            } else {
+                $("#res").html($("#res").html() + '<br>Request Denied.');
+            }
+            socket.removeListener('responce', onResponce);
+        }
+        socket.on('responce', onResponce);
+    });
 });
