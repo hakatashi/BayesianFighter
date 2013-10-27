@@ -1,22 +1,33 @@
 var app = require('http').createServer(handler), io = require('socket.io').listen(app), fs = require('fs');
 
-var fps = 30;
+var fps = 60;
 var fieldState;
 var beyList = new Array();
 var maxBeys = 10;
 var fieldSize = 500;
+var speed = 300;
 
 //ベイオブジェクト
 var BeyObject = function (point, size, session) {
     this.point = point;
     this.size = size;
     this.session = session;
+    this.sensor = { 'x': 0, 'y': 0, 'z': 0 };
+}
+
+function sessionExistsInBeyList(session) {
+    for (i = 0; i < beyList.length; i++) {
+        if (session == beyList[i].session) {
+            return true;
+        }
+    }
+    return false;
 }
 
 //ベイを出現させる
 function createBey(session, size) {
     var emergePoint = false;
-    if (beyList.length >= maxBeys) {
+    if (beyList.length >= maxBeys || sessionExistsInBeyList(session)) {
         return false;
     }
     //乱択して他のベイとぶつからない位置なら続行
@@ -43,6 +54,28 @@ function createBey(session, size) {
     var bey = new BeyObject(emergePoint, size, session);
     beyList.push(bey);
     return true;
+}
+
+//ベイを消去する
+function removeBey(session) {
+    for (i = 0; i < beyList.length; i++) {
+        if (session == beyList[i].session) {
+            beyList.splice(i, 1);
+            return true;
+        }
+    }
+    return false;
+}
+
+//センサ情報の更新
+function updateSensorInfo(session, sensor) {
+    for (i = 0; i < beyList.length; i++) {
+        if (session == beyList[i].session) {
+            beyList[i].sensor = sensor;
+            return true;
+        }
+    }
+    return false;
 }
 
 function distanceBetween(p1, p2) {
@@ -102,9 +135,26 @@ io.of('/send').on('connection', function (socket) {
             socket.emit('responce', false);
         }
     });
+    //消去リクエスト
+    socket.on('exit', function (message) {
+        console.log('sender: ' + socket.id + ': exit request: ' + JSON.stringify(message));
+        if (removeBey(socket.id)) {
+            console.log('sender: ' + socket.id + ': exit request accepted: ' + JSON.stringify(message));
+            socket.emit('responce', true);
+        } else {
+            console.log('sender: ' + socket.id + ': exit request denied: ' + JSON.stringify(message));
+            socket.emit('responce', false);
+        }
+    });
+    //センサ情報の更新
+    socket.on('sensor', function (sensor) {
+        //console.log('sender: ' + socket.id + ': recieved sensor info: ' + JSON.stringify(sensor));
+        updateSensorInfo(socket.id, sensor);
+    })
     //切断
     socket.on('disconnect', function () {
         console.log('sender: ' + socket.id + ': disconnected');
+        removeBey(socket.id);
     });
 });
 
@@ -113,7 +163,7 @@ io.of('/monitor').on('connection', function (socket) {
     console.log('monitor: ' + socket.id + ': connected');
     //汎用メッセージ
     socket.on('info', function (message) {
-        console.log('monitor: ' + socket.id + ': ' + JSON.stringify(message));
+        //console.log('monitor: ' + socket.id + ': ' + JSON.stringify(message));
     });
     //切断
     socket.on('disconnect', function () {
@@ -131,13 +181,16 @@ var roop = function () {
 
 //ベイの位置更新
 var updateBeys = function () {
-
+    beyList.forEach(function (bey) {
+        bey.point[0] += -bey.sensor.x * (speed / fps);
+        bey.point[1] += bey.sensor.y * (speed / fps);
+    })
 };
 
 //モニタに送信
 var sendToMonitor = function () {
     io.of('/monitor').emit('StageInfo', beyList);
-    console.log('sent to monitor: ' + JSON.stringify(beyList));
+    //console.log('sent to monitor: ' + JSON.stringify(beyList));
 };
 
 //起動
