@@ -1,17 +1,18 @@
 var app = require('http').createServer(handler), io = require('socket.io').listen(app), fs = require('fs');
 
-var fps = 60;
+var fps = 30;
 var fieldState;
 var beyList = new Array();
 var maxBeys = 10;
 var fieldSize = 500;
-var speed = 300;
+var speed = 10;
 
 //ベイオブジェクト
 var BeyObject = function (point, size, session) {
     this.point = point;
     this.size = size;
     this.session = session;
+    this.accel = [0, 0];
     this.sensor = { 'x': 0, 'y': 0, 'z': 0 };
 }
 
@@ -80,6 +81,18 @@ function updateSensorInfo(session, sensor) {
 
 function distanceBetween(p1, p2) {
     return Math.sqrt((p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1]));
+}
+
+function vectorAddition(v1, v2, weight) {
+    return [v1[0] + v2[0] * weight, v1[1] + v2[1] * weight];
+}
+
+function polarToRect(r, theta) {
+    return [r * Math.sin(theta), r * Math.cos(theta)];
+}
+
+function rectToPolar(point) {
+    return { "r": distanceBetween(point, [0, 0]), "theta": (point[1] > 0) ? Math.atan(point[0] / point[1]) : (Math.atan(point[0] / point[1]) + Math.PI) };
 }
 
 //ファイルから読み込んでレスポンス
@@ -182,8 +195,14 @@ var roop = function () {
 //ベイの位置更新
 var updateBeys = function () {
     beyList.forEach(function (bey) {
-        bey.point[0] += -bey.sensor.x * (speed / fps);
-        bey.point[1] += bey.sensor.y * (speed / fps);
+        bey.accel[0] += -bey.sensor.x * (speed / fps);
+        bey.accel[1] += bey.sensor.y * (speed / fps);
+        bey.point[0] += bey.accel[0];
+        bey.point[1] += bey.accel[1];
+        if (distanceBetween(bey.point, [0, 0]) > fieldSize - bey.size) {
+            bey.point = polarToRect((fieldSize - bey.size) * 2 - distanceBetween(bey.point, [0, 0]), rectToPolar(bey.point).theta);
+            bey.accel = polarToRect(distanceBetween(bey.accel, [0, 0]), 2 * rectToPolar(bey.point).theta - rectToPolar(bey.accel).theta + Math.PI);
+        }
     })
 };
 
