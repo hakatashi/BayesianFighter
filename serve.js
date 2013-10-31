@@ -5,7 +5,9 @@ var fieldState;
 var beyList = new Array();
 var maxBeys = 10;
 var fieldSize = 500;
-var speed = 10;
+var speed = 3;
+var repulse = 100;
+var friction = 1;
 
 //ベイオブジェクト
 var BeyObject = function (point, size, session) {
@@ -92,7 +94,7 @@ function polarToRect(r, theta) {
 }
 
 function rectToPolar(point) {
-    return { "r": distanceBetween(point, [0, 0]), "theta": (point[1] > 0) ? Math.atan(point[0] / point[1]) : (Math.atan(point[0] / point[1]) + Math.PI) };
+    return { "r": distanceBetween(point, [0, 0]), "theta": (point[1] == 0) ? 0 : ((point[1] > 0) ? Math.atan(point[0] / point[1]) : (Math.atan(point[0] / point[1]) + Math.PI)) };
 }
 
 //ファイルから読み込んでレスポンス
@@ -195,10 +197,27 @@ var roop = function () {
 //ベイの位置更新
 var updateBeys = function () {
     beyList.forEach(function (bey) {
+        var accelPolar = rectToPolar(bey.accel);
+        if (accelPolar.r >= friction / fps) bey.accel = polarToRect(accelPolar.r - friction / fps, accelPolar.theta);
+        else bey.accel = [0, 0];
         bey.accel[0] += -bey.sensor.x * (speed / fps);
         bey.accel[1] += bey.sensor.y * (speed / fps);
         bey.point[0] += bey.accel[0];
         bey.point[1] += bey.accel[1];
+        beyList.forEach(function (objBey) {
+            if (bey.session > objBey.session) {
+                if (distanceBetween(bey.point, objBey.point) < bey.size + objBey.size) {
+                    var objDirection = rectToPolar([objBey.point[0] - bey.point[0], objBey.point[1] - bey.point[1]]); // beyから見たobjBeyの位置
+                    var repulsePower = polarToRect(repulse / fps, objDirection.theta);
+
+                    bey.accel = polarToRect(distanceBetween(bey.accel, [0, 0]), 2 * objDirection.theta - rectToPolar(bey.accel).theta + Math.PI);
+                    bey.accel = [bey.accel[0] - repulsePower[0], bey.accel[1] - repulsePower[1]];
+
+                    objBey.accel = polarToRect(distanceBetween(objBey.accel, [0, 0]), 2 * objDirection.theta - rectToPolar(objBey.accel).theta + Math.PI);
+                    objBey.accel = [objBey.accel[0] + repulsePower[0], objBey.accel[1] + repulsePower[1]];
+                }
+            }
+        })
         if (distanceBetween(bey.point, [0, 0]) > fieldSize - bey.size) {
             bey.point = polarToRect((fieldSize - bey.size) * 2 - distanceBetween(bey.point, [0, 0]), rectToPolar(bey.point).theta);
             bey.accel = polarToRect(distanceBetween(bey.accel, [0, 0]), 2 * rectToPolar(bey.point).theta - rectToPolar(bey.accel).theta + Math.PI);
@@ -211,6 +230,8 @@ var sendToMonitor = function () {
     io.of('/monitor').emit('StageInfo', beyList);
     //console.log('sent to monitor: ' + JSON.stringify(beyList));
 };
+
+beyList[0] = new BeyObject([0, 0], 30, '');
 
 //起動
 roop();

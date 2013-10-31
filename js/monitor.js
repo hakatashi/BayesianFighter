@@ -35,9 +35,13 @@ $(function () {
         console.log(JSON.stringify(message));
         removeAllCircles();
         message.forEach(function (bey) {
+            Math.seedrandom(bey.session);
+            bey.hue = Math.random() * 360;
+            bey.saturation = 0.6 + Math.random() * 0.4;
+            bey.brightness = 1.0;
             var beyLocate = new paper.Point(bey.point);
             var tempCircle = new paper.Path.Circle(beyLocate.add(paper.view.center), bey.size);
-            tempCircle.fillColor = 'red';
+            tempCircle.fillColor = new paper.Color({ 'hue': bey.hue, 'saturation': bey.saturation, 'brightness': bey.brightness });
             beyCircles.push(tempCircle);
         })
         paper.view.draw();
