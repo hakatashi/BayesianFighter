@@ -39,7 +39,7 @@ $(function () {
         GravCirc.position = [-gravity.x * 20 + 200, gravity.y * 20 + 200];
         GravCirc.scale((gravity.z + 10.0) * 2.0 / GravCirc.bounds.width);
 
-        socket.emit('sensor', gravity);
+        socket.emit('sensor', JSON.stringify(gravity));
 
         // 以下は一部のデバイスでしか動かない可能性あり
 

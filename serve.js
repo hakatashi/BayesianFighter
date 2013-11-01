@@ -164,7 +164,7 @@ io.of('/send').on('connection', function (socket) {
     //センサ情報の更新
     socket.on('sensor', function (sensor) {
         //console.log('sender: ' + socket.id + ': recieved sensor info: ' + JSON.stringify(sensor));
-        updateSensorInfo(socket.id, sensor);
+        updateSensorInfo(socket.id, JSON.parse(sensor));
     })
     //切断
     socket.on('disconnect', function () {
@@ -231,7 +231,7 @@ var sendToMonitor = function () {
     //console.log('sent to monitor: ' + JSON.stringify(beyList));
 };
 
-beyList[0] = new BeyObject([0, 0], 30, '');
+// beyList[0] = new BeyObject([0, 0], 30, '');
 
 //起動
 roop();

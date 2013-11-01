@@ -19,7 +19,7 @@ $(function () {
 
     //フィールド円描画
     var fieldShape = new paper.Path.Circle(viewPoint.add(paper.view.center), fieldSize);
-    fieldShape.fillColor = '#ccc';
+    fieldShape.fillColor = '#ddd';
     console.log(JSON.stringify(fieldShape));
 
     paper.view.draw();
