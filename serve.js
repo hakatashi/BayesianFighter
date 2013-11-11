@@ -1,6 +1,7 @@
 var app = require('http').createServer(handler), io = require('socket.io').listen(app), fs = require('fs');
 
-var fps = 30;
+var renderFPS = 60;
+var worldFPS = 180;
 var fieldState;
 var beyList = new Array();
 var maxBeys = 10;
@@ -188,37 +189,52 @@ io.of('/monitor').on('connection', function (socket) {
     });
 });
 
-//メインループ
-var roop = function () {
+//送信ループ
+var renderRoop = function () {
+    setInterval(function () {
+        sendToMonitor();
+    }, 1000.0 / renderFPS);
+};
+
+//ベイ更新ループ
+var worldRoop = function () {
     setInterval(function () {
         updateBeys();
-        sendToMonitor();
-    }, 1000.0 / fps);
+    }, 1000.0 / worldFPS);
 };
+
 
 //ベイの位置更新
 var updateBeys = function () {
     beyList.forEach(function (bey) {
         var accelPolar = rectToPolar(bey.accel);
-        if (accelPolar.r >= friction / fps) bey.accel = polarToRect(accelPolar.r - friction / fps, accelPolar.theta);
+        //摩擦による減速
+        if (accelPolar.r >= friction) bey.accel = polarToRect(accelPolar.r - friction, accelPolar.theta);
         else bey.accel = [0, 0];
-        bey.accel[0] += -bey.sensor.x * (speed / fps);
-        bey.accel[1] += bey.sensor.y * (speed / fps);
-        bey.point[0] += bey.accel[0];
-        bey.point[1] += bey.accel[1];
+        //センサー値を反映して加速
+        bey.accel[0] += -bey.sensor.x * speed;
+        bey.accel[1] += bey.sensor.y * speed;
+        bey.point[0] += bey.accel[0] / worldFPS;
+        bey.point[1] += bey.accel[1] / worldFPS;
+
         //衝突処理
         beyList.forEach(function (objBey) {
             if (bey.session > objBey.session) {
                 if (distanceBetween(bey.point, objBey.point) < bey.size + objBey.size) {
-                    var objDirection = rectToPolar([objBey.point[0] - bey.point[0], objBey.point[1] - bey.point[1]]); // beyから見たobjBeyの位置
+                    // beyから見たobjBeyの位置
+                    var objDirection = rectToPolar([objBey.point[0] - bey.point[0], objBey.point[1] - bey.point[1]]);
+                    //速度を法線成分と平行成分に分離
                     var resolvedBeyAcc = polarToRect(rectToPolar(bey.accel).r, rectToPolar(bey.accel).theta - objDirection.theta);
                     var resolvedObjAcc = polarToRect(rectToPolar(objBey.accel).r, rectToPolar(objBey.accel).theta - objDirection.theta);
-                    var repulsePower = polarToRect(repulse / fps, objDirection.theta);
+                    //反発力
+                    var repulsePower = polarToRect(repulse, objDirection.theta);
 
-                    objBey.point = [bey.point[0] + (objBey.point[0] - bey.point[0]) / objDirection.r * (bey.size + objBey.size) * 1.05,
-                        bey.point[1] + (objBey.point[1] - bey.point[1]) / objDirection.r * (bey.size + objBey.size) * 1.05];
+                    //objBeyを押しのけて重複状態を解消
+                    objBey.point = [bey.point[0] + (objBey.point[0] - bey.point[0]) / objDirection.r * (bey.size + objBey.size) * 1.02,
+                        bey.point[1] + (objBey.point[1] - bey.point[1]) / objDirection.r * (bey.size + objBey.size) * 1.02];
 
                     /*
+                    衝突後の速度を以下の数式で演算。
                     \[\begin{cases}m_{1}v_{1}'+m_{2}v_{2}'=m_{1}v_{1}+m_{2}v_{2}\\\left(v_{1}'-v_{2}'\right)=-e\left(v_{1}-v_{2}\right)\end{cases}\]
                     \[\begin{cases}v_{1}'=v_{1}-\left(v_{1}-v_{2}\right)\left(1+e\right)\frac{m_{2}}{m_{1}+m_{2}}\\v_{2}'=v_{2}+\left(v_{1}-v_{2}\right)\left(1+e\right)\frac{m_{1}}{m_{1}+m_{2}}\end{cases}\]
                     */
@@ -247,7 +263,12 @@ var sendToMonitor = function () {
     //console.log('sent to monitor: ' + JSON.stringify(beyList));
 };
 
-beyList[0] = new BeyObject([0, 0], 30, '');
+createBey("a", 30);
+createBey("b", 30);
+createBey("c", 30);
+createBey("d", 30);
+createBey("e", 30);
 
 //起動
-roop();
+renderRoop();
+worldRoop();
