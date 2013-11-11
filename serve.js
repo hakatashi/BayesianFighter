@@ -16,7 +16,7 @@ var BeyObject = function (point, size, session) {
     this.point = point;
     this.size = size;
     this.session = session;
-    this.accel = [0, 0];
+    this.speed = [0, 0];
     this.sensor = { 'x': 0, 'y': 0, 'z': 0 };
     this.weight = 100;
 }
@@ -207,15 +207,15 @@ var worldRoop = function () {
 //ベイの位置更新
 var updateBeys = function () {
     beyList.forEach(function (bey) {
-        var accelPolar = rectToPolar(bey.accel);
+        var speedPolar = rectToPolar(bey.speed);
         //摩擦による減速
-        if (accelPolar.r >= friction) bey.accel = polarToRect(accelPolar.r - friction, accelPolar.theta);
-        else bey.accel = [0, 0];
+        if (speedPolar.r >= friction) bey.speed = polarToRect(speedPolar.r - friction, speedPolar.theta);
+        else bey.speed = [0, 0];
         //センサー値を反映して加速
-        bey.accel[0] += -bey.sensor.x * speed;
-        bey.accel[1] += bey.sensor.y * speed;
-        bey.point[0] += bey.accel[0] / worldFPS;
-        bey.point[1] += bey.accel[1] / worldFPS;
+        bey.speed[0] += -bey.sensor.x * speed;
+        bey.speed[1] += bey.sensor.y * speed;
+        bey.point[0] += bey.speed[0] / worldFPS;
+        bey.point[1] += bey.speed[1] / worldFPS;
 
         //衝突処理
         beyList.forEach(function (objBey) {
@@ -224,8 +224,8 @@ var updateBeys = function () {
                     // beyから見たobjBeyの位置
                     var objDirection = rectToPolar([objBey.point[0] - bey.point[0], objBey.point[1] - bey.point[1]]);
                     //速度を法線成分と平行成分に分離
-                    var resolvedBeyAcc = polarToRect(rectToPolar(bey.accel).r, rectToPolar(bey.accel).theta - objDirection.theta);
-                    var resolvedObjAcc = polarToRect(rectToPolar(objBey.accel).r, rectToPolar(objBey.accel).theta - objDirection.theta);
+                    var resolvedBeySpd = polarToRect(rectToPolar(bey.speed).r, rectToPolar(bey.speed).theta - objDirection.theta);
+                    var resolvedObjSpd = polarToRect(rectToPolar(objBey.speed).r, rectToPolar(objBey.speed).theta - objDirection.theta);
                     //反発力
                     var repulsePower = polarToRect(repulse, objDirection.theta);
 
@@ -239,20 +239,20 @@ var updateBeys = function () {
                     \[\begin{cases}v_{1}'=v_{1}-\left(v_{1}-v_{2}\right)\left(1+e\right)\frac{m_{2}}{m_{1}+m_{2}}\\v_{2}'=v_{2}+\left(v_{1}-v_{2}\right)\left(1+e\right)\frac{m_{1}}{m_{1}+m_{2}}\end{cases}\]
                     */
 
-                    var newResolvedBeyAccY = resolvedBeyAcc[1] - (resolvedBeyAcc[1] - resolvedObjAcc[1]) * (1 + restCoeff) * (objBey.weight / (bey.weight + objBey.weight));
-                    var newResolvedObjAccY = resolvedObjAcc[1] + (resolvedBeyAcc[1] - resolvedObjAcc[1]) * (1 + restCoeff) * (bey.weight / (bey.weight + objBey.weight));
+                    var newResolvedBeySpdY = resolvedBeySpd[1] - (resolvedBeySpd[1] - resolvedObjSpd[1]) * (1 + restCoeff) * (objBey.weight / (bey.weight + objBey.weight));
+                    var newResolvedObjSpdY = resolvedObjSpd[1] + (resolvedBeySpd[1] - resolvedObjSpd[1]) * (1 + restCoeff) * (bey.weight / (bey.weight + objBey.weight));
 
-                    resolvedBeyAcc[1] = newResolvedBeyAccY;
-                    resolvedObjAcc[1] = newResolvedObjAccY;
+                    resolvedBeySpd[1] = newResolvedBeySpdY;
+                    resolvedObjSpd[1] = newResolvedObjSpdY;
 
-                    bey.accel = polarToRect(rectToPolar(resolvedBeyAcc).r, rectToPolar(resolvedBeyAcc).theta + objDirection.theta);
-                    objBey.accel = polarToRect(rectToPolar(resolvedObjAcc).r, rectToPolar(resolvedObjAcc).theta + objDirection.theta);
+                    bey.speed = polarToRect(rectToPolar(resolvedBeySpd).r, rectToPolar(resolvedBeySpd).theta + objDirection.theta);
+                    objBey.speed = polarToRect(rectToPolar(resolvedObjSpd).r, rectToPolar(resolvedObjSpd).theta + objDirection.theta);
                 }
             }
         })
         if (distanceBetween(bey.point, [0, 0]) > fieldSize - bey.size) {
             bey.point = polarToRect((fieldSize - bey.size) * 2 - distanceBetween(bey.point, [0, 0]), rectToPolar(bey.point).theta);
-            bey.accel = polarToRect(distanceBetween(bey.accel, [0, 0]), 2 * rectToPolar(bey.point).theta - rectToPolar(bey.accel).theta + Math.PI);
+            bey.speed = polarToRect(distanceBetween(bey.speed, [0, 0]), 2 * rectToPolar(bey.point).theta - rectToPolar(bey.speed).theta + Math.PI);
         }
     })
 };
