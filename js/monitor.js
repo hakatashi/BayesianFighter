@@ -11,6 +11,16 @@ $(function () {
 
     var beyCircles = new Array();
 
+    var socketFPS = 0;
+    var drawFPS = 0;
+
+    var socketFPStext = new paper.PointText(new paper.Point(10, 20));
+    var drawFPStext = new paper.PointText(new paper.Point(10, 40));
+    socketFPStext.fillColor = 'black';
+    drawFPStext.fillColor = 'black';
+
+    var beys;
+
     function removeAllCircles() {
         beyCircles.forEach(function (beyCircle) {
             beyCircle.remove();
@@ -32,9 +42,15 @@ $(function () {
 
     //èÓïÒçXêV
     socket.on('StageInfo', function (message) {
-        console.log(JSON.stringify(message));
+        //console.log(JSON.stringify(message));
+        beys = message;
+        socketFPS++;
+    });
+
+    //ï`âÊ
+    setInterval(function () {
         removeAllCircles();
-        message.forEach(function (bey) {
+        beys.forEach(function (bey) {
             Math.seedrandom(bey.session);
             bey.hue = Math.random() * 360;
             bey.saturation = 0.6 + Math.random() * 0.4;
@@ -45,6 +61,14 @@ $(function () {
             beyCircles.push(tempCircle);
         })
         paper.view.draw();
-    });
+        drawFPS++;
+    }, 1000 / 60);
+
+    setInterval(function () {
+        socketFPStext.content = 'Socket FPS: ' + socketFPS;
+        drawFPStext.content = 'Draw FPS: ' + drawFPS;
+        socketFPS = 0;
+        drawFPS = 0;
+    }, 1000);
 
 });

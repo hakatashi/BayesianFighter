@@ -6,12 +6,12 @@ var cpuThinkFPS = 3;
 var fieldState;
 var beyList = new Array();
 var maxBeys = 15;
-var stdBeys = 5;
+var stdBeys = 10;
 var cpuMinEmergeTime = 3;
 var fieldSize = 500;
-var speed = 1;
-var repulse = 100;
-var friction = 1;
+var speed = 1.5;
+var repulse = 300;
+var friction = 3;
 var restCoeff = 1; //îΩî≠åWêî
 
 var latestCpuEmergeFrame = 0;
@@ -283,6 +283,9 @@ var updateBeys = function () {
 
                     bey.speed = polarToRect(rectToPolar(resolvedBeySpd).r, rectToPolar(resolvedBeySpd).theta + objDirection.theta);
                     objBey.speed = polarToRect(rectToPolar(resolvedObjSpd).r, rectToPolar(resolvedObjSpd).theta + objDirection.theta);
+
+                    bey.speed = [bey.speed[0] - repulsePower[0], bey.speed[1] - repulsePower[1]];
+                    objBey.speed = [objBey.speed[0] + repulsePower[0], objBey.speed[1] + repulsePower[1]];
                 }
             }
         })
