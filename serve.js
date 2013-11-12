@@ -1,18 +1,25 @@
 var app = require('http').createServer(handler), io = require('socket.io').listen(app), fs = require('fs');
 
 var renderFPS = 60;
-var worldFPS = 180;
+var worldFPS = 120;
+var cpuThinkFPS = 3;
 var fieldState;
 var beyList = new Array();
-var maxBeys = 10;
+var maxBeys = 15;
+var stdBeys = 5;
+var cpuMinEmergeTime = 3;
 var fieldSize = 500;
-var speed = 3;
+var speed = 1;
 var repulse = 100;
 var friction = 1;
 var restCoeff = 1; //反発係数
 
+var latestCpuEmergeFrame = 0;
+var frame = 0;
+
 //ベイオブジェクト
-var BeyObject = function (point, size, session) {
+var BeyObject = function (point, size, session, isCPU) {
+    this.isCPU = isCPU;
     this.point = point;
     this.size = size;
     this.session = session;
@@ -30,12 +37,7 @@ function sessionExistsInBeyList(session) {
     return false;
 }
 
-//ベイを出現させる
-function createBey(session, size) {
-    var emergePoint = false;
-    if (beyList.length >= maxBeys || sessionExistsInBeyList(session)) {
-        return false;
-    }
+function searchEmergePoint(size) {
     //乱択して他のベイとぶつからない位置なら続行
     //n回試行してダメなら諦める
     for (i = 0; i < 100; i++) {
@@ -50,14 +52,22 @@ function createBey(session, size) {
             }
         }
         if (emergeFlag) {
-            emergePoint = pointByRect;
-            break;
+            return pointByRect;
         }
     }
-    if (emergePoint == false) {
+    return false;
+}
+
+//ベイを出現させる
+function createBey(session, size) {
+    var emergePoint = false;
+    if (beyList.length >= maxBeys || sessionExistsInBeyList(session)) {
         return false;
     }
-    var bey = new BeyObject(emergePoint, size, session);
+    if ((emergePoint = searchEmergePoint(size)) == false) {
+        return false;
+    }
+    var bey = new BeyObject(emergePoint, size, session, false);
     beyList.push(bey);
     return true;
 }
@@ -189,20 +199,46 @@ io.of('/monitor').on('connection', function (socket) {
     });
 });
 
+//メインループ
+var worldRoop = function () {
+    setInterval(function () {
+        updateCPU();
+        updateBeys();
+        frame++;
+    }, 1000.0 / worldFPS);
+}
+
 //送信ループ
 var renderRoop = function () {
     setInterval(function () {
         sendToMonitor();
     }, 1000.0 / renderFPS);
-};
+}
 
-//ベイ更新ループ
-var worldRoop = function () {
+//CPUループ
+var cpuThinkRoop = function () {
     setInterval(function () {
-        updateBeys();
-    }, 1000.0 / worldFPS);
-};
+        cpuThink();
+    }, 1000.0 / cpuThinkFPS);
+}
 
+var emergeCPU = function () {
+    var emergePoint;
+    if ((emergePoint = searchEmergePoint(30)) == false) {
+        return false;
+    }
+    var bey = new BeyObject(emergePoint, 30, String(Math.random()), true);
+    beyList.push(bey);
+    latestCpuEmergeFrame = frame;
+    return true;
+}
+
+var updateCPU = function () {
+    //盤面のベイの数がstdBeys個に満たない場合、CPUを追加
+    if (beyList.length < stdBeys && frame > latestCpuEmergeFrame + cpuMinEmergeTime * worldFPS) {
+        emergeCPU();
+    }
+}
 
 //ベイの位置更新
 var updateBeys = function () {
@@ -221,7 +257,7 @@ var updateBeys = function () {
         beyList.forEach(function (objBey) {
             if (bey.session > objBey.session) {
                 if (distanceBetween(bey.point, objBey.point) < bey.size + objBey.size) {
-                    // beyから見たobjBeyの位置
+                    //beyから見たobjBeyの位置
                     var objDirection = rectToPolar([objBey.point[0] - bey.point[0], objBey.point[1] - bey.point[1]]);
                     //速度を法線成分と平行成分に分離
                     var resolvedBeySpd = polarToRect(rectToPolar(bey.speed).r, rectToPolar(bey.speed).theta - objDirection.theta);
@@ -251,24 +287,45 @@ var updateBeys = function () {
             }
         })
         if (distanceBetween(bey.point, [0, 0]) > fieldSize - bey.size) {
-            bey.point = polarToRect((fieldSize - bey.size) * 2 - distanceBetween(bey.point, [0, 0]), rectToPolar(bey.point).theta);
-            bey.speed = polarToRect(distanceBetween(bey.speed, [0, 0]), 2 * rectToPolar(bey.point).theta - rectToPolar(bey.speed).theta + Math.PI);
+            removeBey(bey.session);
+            //bey.point = polarToRect((fieldSize - bey.size) * 2 - distanceBetween(bey.point, [0, 0]), rectToPolar(bey.point).theta);
+            //bey.speed = polarToRect(distanceBetween(bey.speed, [0, 0]), 2 * rectToPolar(bey.point).theta - rectToPolar(bey.speed).theta + Math.PI);
         }
     })
 };
+
+var cpuThink = function () {
+    beyList.forEach(function (bey) {
+        if (bey.isCPU) {
+            if (distanceBetween(bey.speed, [0, 0]) > 5000) {
+                var speedVector = rectToPolar(bey.speed);
+                var sensorRect = polarToRect(8, speedVector.theta + Math.PI);
+                bey.sensor.x = -sensorRect[0];
+                bey.sensor.y = sensorRect[1];
+                return;
+            }
+            var prospects = [bey.point[0] + bey.speed[0] * 0.5, bey.point[1] + bey.speed[1] * 0.5];
+            if (distanceBetween(prospects, [0, 0]) > fieldSize || fieldSize - distanceBetween(bey.point,[0,0]) - bey.size < 100) {
+                var outerVector = rectToPolar(bey.point);
+                var sensorRect = polarToRect(8, outerVector.theta + Math.PI);
+                bey.sensor.x = -sensorRect[0];
+                bey.sensor.y = sensorRect[1];
+                return;
+            }
+            var sensorRect = polarToRect(5, Math.random() * Math.PI * 2);
+            bey.sensor.x = -sensorRect[0];
+            bey.sensor.y = sensorRect[1];
+        }
+    });
+}
 
 //モニタに送信
 var sendToMonitor = function () {
     io.of('/monitor').emit('StageInfo', beyList);
     //console.log('sent to monitor: ' + JSON.stringify(beyList));
-};
-
-createBey("a", 30);
-createBey("b", 30);
-createBey("c", 30);
-createBey("d", 30);
-createBey("e", 30);
+}
 
 //起動
 renderRoop();
 worldRoop();
+cpuThinkRoop();
