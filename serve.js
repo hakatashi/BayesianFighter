@@ -16,6 +16,7 @@ var restCoeff = 1; //反発係数
 
 var latestCpuEmergeFrame = 0;
 var frame = 0;
+var clients = {};
 
 //ベイオブジェクト
 var BeyObject = function (point, size, session, isCPU) {
@@ -26,6 +27,7 @@ var BeyObject = function (point, size, session, isCPU) {
     this.speed = [0, 0];
     this.sensor = { 'x': 0, 'y': 0, 'z': 0 };
     this.weight = 100;
+    this.emergeTime = frame;
 }
 
 function sessionExistsInBeyList(session) {
@@ -76,6 +78,13 @@ function createBey(session, size) {
 function removeBey(session) {
     for (i = 0; i < beyList.length; i++) {
         if (session == beyList[i].session) {
+            console.log(session);
+            console.log(clients[session]);
+            if (!(beyList[i].isCPU)) {
+                clients[session].emit('dead', JSON.stringify({
+                    'surviveTime': (frame - beyList[i].emergeTime) / worldFPS
+                }));
+            }
             beyList.splice(i, 1);
             return true;
         }
@@ -132,7 +141,7 @@ var writeFromFile = function (req, res, locate) {
     });
 }
 
-app.listen(8080);
+app.listen(25);
 
 //必要なファイルを提供
 function handler (req, res) {
@@ -157,6 +166,7 @@ io.of('/send').on('connection', function (socket) {
         console.log('sender: ' + socket.id + ': emerge request: ' + JSON.stringify(message));
         if (createBey(socket.id, 30)) {
             console.log('sender: ' + socket.id + ': emerge request accepted: ' + JSON.stringify(message));
+            clients[socket.id] = socket;
             socket.emit('responce', true);
         } else {
             console.log('sender: ' + socket.id + ': emerge request denied: ' + JSON.stringify(message));

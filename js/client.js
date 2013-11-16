@@ -68,9 +68,9 @@ $(function () {
 
     var onResponce = function (message) {
         if (message) {
-            $("#res").html($("#res").html() + '<br>Request Accepted.');
+            $("#res").html('Request Accepted.<br>' + $("#res").html());
         } else {
-            $("#res").html($("#res").html() + '<br>Request Denied.');
+            $("#res").html('Request Denied.<br>' + $("#res").html());
         }
         socket.removeListener('responce', onResponce);
     }
@@ -83,5 +83,10 @@ $(function () {
     $("#exit").click(function () {
         socket.emit('exit');
         socket.on('responce', onResponce);
+    });
+
+    socket.on('dead', function (message) {
+        var data = JSON.parse(message);
+        $("#res").html('Youve Died. ' + data.surviveTime.toFixed(1) + ' second survived.<br>' + $("#res").html());
     });
 });
