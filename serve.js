@@ -1,4 +1,7 @@
-var app = require('http').createServer(handler), io = require('socket.io').listen(app), fs = require('fs');
+var app = require('http').createServer(handler);
+var io = require('socket.io').listen(app);
+var fs = require('fs');
+var path = require('path');
 
 var renderFPS = 60;
 var worldFPS = 180;
@@ -17,6 +20,16 @@ var restCoeff = 1; //反発係数
 var latestCpuEmergeFrame = 0;
 var frame = 0;
 var clients = {};
+
+var mimeTypes = {
+    "html": "text/html; charset=utf-8",
+    "jpeg": "image/jpeg",
+    "jpg": "image/jpeg",
+    "png": "image/png",
+    "js": "text/javascript",
+    "css": "text/css",
+    "svg": "image/svg+xml"
+};
 
 //ベイオブジェクト
 var BeyObject = function (point, size, session, isCPU) {
@@ -133,7 +146,7 @@ var writeFromFile = function (req, res, locate) {
         }
 
         res.writeHead(200, {
-            'Content-Type': 'text/html; charset=utf-8'
+            'Content-Type': mimeTypes[path.extname(locate).split(".")[1]]
         });
         res.write(data);
         res.end();
@@ -150,6 +163,7 @@ function handler (req, res) {
     else if (urlinfo.pathname === "/js/client.js") writeFromFile(req, res, "/js/client.js");
     else if (urlinfo.pathname === "/monitor") writeFromFile(req, res, "/monitor.html");
     else if (urlinfo.pathname === "/js/monitor.js") writeFromFile(req, res, "/js/monitor.js");
+    else if (urlinfo.pathname === "/img/bey01.svg") writeFromFile(req, res, "/img/bey01.svg");
 }
 
 //接続時処理
@@ -157,6 +171,8 @@ function handler (req, res) {
 //センダー
 io.of('/send').on('connection', function (socket) {
     console.log('sender: ' + socket.id + ': connected');
+    //クライアントにidを送信
+    socket.emit('establish', JSON.stringify({ 'id': socket.id }));
     //汎用メッセージ
     socket.on('info', function (message) {
         console.log('sender: ' + socket.id + ': ' + JSON.stringify(message));

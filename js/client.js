@@ -1,5 +1,21 @@
 $(function () {
     var socket = io.connect('http://' + location.host + '/send');
+    var socketid;
+
+    var canvas = document.getElementById('Canvas');
+
+    paper.setup(canvas);
+
+    var project = new paper.Project(canvas);
+    
+    var bey_svg = project.importSVG(document.getElementById('bey_svg'));
+    bey_svg.position = paper.view.center;
+    bey_svg.angle = 0; //custom property
+
+    var baseGroup = bey_svg.children['base'];
+    var designGroup = bey_svg.children['design'];
+    baseGroup.transformContent = true;
+    designGroup.transformContent = true;
 
     setInterval(function () {
         var message = Date();
@@ -8,36 +24,10 @@ $(function () {
         console.log(message);
     }, 1000);
 
-    // 円描画
-
-    var canvas = document.getElementById('Canvas');
-
-    paper.setup(canvas);
-    var GravCirc = new paper.Path.Circle(new paper.Point(200, 200), 5);
-    GravCirc.fillColor = "red";
-    var AccCirc = new paper.Path.Circle(new paper.Point(200, 200), 5);
-    AccCirc.fillColor = "blue";
-    var RotCirc = new paper.Path.Circle(new paper.Point(200, 200), 5);
-    RotCirc.fillColor = "black";
-    var DiffCirc = new paper.Path.Circle(new paper.Point(200, 200), 5);
-    DiffCirc.fillColor = "green";
-
-    // 軸描画
-
-    var axisX = new paper.Path();
-    axisX.strokeColor = 'black';
-    axisX.add([0, 200], [400, 200]);
-
-    var axisY = new paper.Path();
-    axisY.strokeColor = 'black';
-    axisY.add([200, 0], [200, 400]);
-
     window.addEventListener('devicemotion', function (e) {
         // 重力加速度
         var gravity = e.accelerationIncludingGravity;
         $("#gravity").text('重力加速度: ' + gravity.x + ', ' + gravity.y + ', ' + gravity.z);
-        GravCirc.position = [-gravity.x * 20 + 200, gravity.y * 20 + 200];
-        GravCirc.scale((gravity.z + 10.0) * 2.0 / GravCirc.bounds.width);
 
         socket.emit('sensor', JSON.stringify(gravity));
 
@@ -51,17 +41,10 @@ $(function () {
 
         var accel = e.acceleration;
         $("#accel").text('加速度: ' + accel.x + ', ' + accel.y + ', ' + accel.z);
-        AccCirc.position = [-accel.x * 20 + 200, accel.y * 20 + 200];
-        AccCirc.scale((accel.z + 10.0) * 2.0 / AccCirc.bounds.width);
-
-        DiffCirc.position = [-(gravity.x - accel.x) * 20 + 200, (gravity.y - accel.y) * 20 + 200];
-        AccCirc.scale(((gravity.z - accel.z) + 10.0) * 2.0 / AccCirc.bounds.width);
 
         // 回転加速度
         var rotation = e.rotationRate;
         $("#rotation").text('回転加速度: ' + rotation.x + ', ' + rotation.y + ', ' + rotation.z);
-        RotCirc.position = [-rotation.x * 20 + 200, rotation.y * 20 + 200];
-        RotCirc.scale((rotation.z + 10.0) * 2.0 / RotCirc.bounds.width);
 
         paper.view.draw();
     });
@@ -89,4 +72,27 @@ $(function () {
         var data = JSON.parse(message);
         $("#res").html('Youve Died. ' + data.surviveTime.toFixed(1) + ' second survived.<br>' + $("#res").html());
     });
+
+    socket.on('establish', function (message) {
+        var data = JSON.parse(message);
+        socketid = data.id;
+
+        Math.seedrandom(socketid);
+        console.log(socketid);
+        if (Math.random() > 0.5) {
+            baseGroup.fillColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
+            designGroup.fillColor = new paper.Color({ 'hue': baseGroup.fillColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.1 + Math.random() * 0.5 });
+        } else {
+            baseGroup.fillColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.1 + Math.random() * 0.5 });
+            designGroup.fillColor = new paper.Color({ 'hue': baseGroup.fillColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
+        }
+
+        paper.view.draw();
+    });
+
+    paper.view.onFrame = function (event) {
+        var destAngle = Math.sin(event.time) * 1000;
+        bey_svg.rotate(destAngle - bey_svg.angle);
+        bey_svg.angle = destAngle;
+    };
 });
