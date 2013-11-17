@@ -1,7 +1,7 @@
 var app = require('http').createServer(handler), io = require('socket.io').listen(app), fs = require('fs');
 
 var renderFPS = 60;
-var worldFPS = 120;
+var worldFPS = 180;
 var cpuThinkFPS = 3;
 var fieldState;
 var beyList = new Array();
@@ -9,9 +9,9 @@ var maxBeys = 15;
 var stdBeys = 10;
 var cpuMinEmergeTime = 3;
 var fieldSize = 500;
-var speed = 1.5;
-var repulse = 300;
-var friction = 3;
+var speed = 0.8;
+var repulse = 200;
+var friction = 2;
 var restCoeff = 1; //”½”­ŒW”
 
 var latestCpuEmergeFrame = 0;
