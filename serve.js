@@ -163,6 +163,7 @@ function handler (req, res) {
     else if (urlinfo.pathname === "/js/client.js") writeFromFile(req, res, "/js/client.js");
     else if (urlinfo.pathname === "/monitor") writeFromFile(req, res, "/monitor.html");
     else if (urlinfo.pathname === "/js/monitor.js") writeFromFile(req, res, "/js/monitor.js");
+    else if (urlinfo.pathname === "/js/paper.min.js") writeFromFile(req, res, "/js/paper.min.js");
     else if (urlinfo.pathname === "/img/bey01.svg") writeFromFile(req, res, "/img/bey01.svg");
 }
 

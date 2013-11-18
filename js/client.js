@@ -11,6 +11,15 @@ $(function () {
     var bey_svg = project.importSVG(document.getElementById('bey_svg'));
     bey_svg.position = paper.view.center;
     bey_svg.angle = 0; //custom property
+    bey_svg.scale(Math.min(paper.view.size.width, paper.view.size.height) * 0.9 / 300);
+
+    nowLoadingText = new paper.PointText({
+        point: paper.view.center,
+        content: 'Now Loading...',
+        fillColor: 'white',
+        fontSize: 24,
+        justification: 'center'
+    });
 
     var baseGroup = bey_svg.children['base'];
     var designGroup = bey_svg.children['design'];
@@ -77,6 +86,8 @@ $(function () {
         var data = JSON.parse(message);
         socketid = data.id;
 
+        nowLoadingText.remove();
+
         Math.seedrandom(socketid);
         console.log(socketid);
         if (Math.random() > 0.5) {
@@ -87,11 +98,31 @@ $(function () {
             designGroup.fillColor = new paper.Color({ 'hue': baseGroup.fillColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
         }
 
+        var infoWindow = new paper.Rectangle([paper.view.size.width * 0.1, paper.view.size.height * 0.1], [paper.view.size.width * 0.8, paper.view.size.height * 0.8]);
+        var infoWindowRounded = new paper.Path.RoundRectangle(infoWindow, new paper.Size(10, 10));
+        infoWindowRounded.fillColor = 'black';
+        infoWindowRounded.opacity = 0.7;
+
+        var connectText = [];
+        for (var i = 0; i < 3; i++) {
+            connectText[i] = new paper.PointText({ fillColor: 'white', justification: 'center' });
+        }
+        connectText[0].content = '本日は駒場祭2013にお越しいただきありがとうございます。';
+        connectText[0].point = [paper.view.size.width * 0.5, paper.view.size.height * 0.2];
+        connectText[0].fontSize = 32;
+        connectText[1].content = '無事、あなたのベイが作成できました！';
+        connectText[1].point = [paper.view.size.width * 0.5, paper.view.size.height * 0.3];
+        connectText[1].fontSize = 60;
+        connectText[2].content = '続いて、端末の向きを判定します。';
+        connectText[2].point = [paper.view.size.width * 0.5, paper.view.size.height * 0.5];
+        connectText[2].fontSize = 48;
+
         paper.view.draw();
     });
 
     paper.view.onFrame = function (event) {
-        var destAngle = Math.sin(event.time) * 1000;
+        // var destAngle = Math.sin(event.time / 2) * 3000;
+        var destAngle = event.time * 5;
         bey_svg.rotate(destAngle - bey_svg.angle);
         bey_svg.angle = destAngle;
     };
