@@ -21,6 +21,8 @@ var latestCpuEmergeFrame = 0;
 var frame = 0;
 var clients = {};
 
+var allowedAccesses = ["/js/client.js", "/monitor", "/js/monitor.js", "/js/paper.min.js", "/img/bey01.svg", "/img/message01.svg"];
+
 var mimeTypes = {
     "html": "text/html; charset=utf-8",
     "jpeg": "image/jpeg",
@@ -160,11 +162,8 @@ app.listen(8080);
 function handler (req, res) {
     var urlinfo = require('url').parse(req.url, true);
     if (urlinfo.pathname === "/") writeFromFile(req, res, "/index.html");
-    else if (urlinfo.pathname === "/js/client.js") writeFromFile(req, res, "/js/client.js");
     else if (urlinfo.pathname === "/monitor") writeFromFile(req, res, "/monitor.html");
-    else if (urlinfo.pathname === "/js/monitor.js") writeFromFile(req, res, "/js/monitor.js");
-    else if (urlinfo.pathname === "/js/paper.min.js") writeFromFile(req, res, "/js/paper.min.js");
-    else if (urlinfo.pathname === "/img/bey01.svg") writeFromFile(req, res, "/img/bey01.svg");
+    else if (allowedAccesses.indexOf(urlinfo.pathname) >= 0) writeFromFile(req, res, urlinfo.pathname);
 }
 
 //Ú‘±ˆ—

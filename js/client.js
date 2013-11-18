@@ -8,6 +8,9 @@ $(function () {
 
     var project = new paper.Project(canvas);
 
+    var SVGURLs = ['/img/bey01.svg', '/img/message01.svg'];
+    var SVGcache = {};
+
     nowLoadingText = new paper.PointText({
         point: paper.view.center,
         content: 'Now Loading...',
@@ -18,18 +21,32 @@ $(function () {
 
     paper.view.draw();
 
-    $.get('/img/bey01.svg', function (data) {
-        var bey_svg = project.importSVG(data);
-        bey_svg.position = paper.view.center;
-        bey_svg.angle = 0; //custom property
-        bey_svg.scale(Math.min(paper.view.size.width, paper.view.size.height) * 0.9 / 300);
+    var getData = function(name)  {
+        return SVGcache[name] || $.ajax(
+            name, {
+                success: function (data) {
+                    SVGcache[name] = data;
+                }
+            });
+    };
 
-        var baseGroup = bey_svg.children['base'];
-        var designGroup = bey_svg.children['design'];
+    deferredObjects = [];
+    for (var i = 0; i < SVGURLs.length; i++) {
+        deferredObjects.push(getData(SVGURLs[i]));
+    }
+
+    $.when.apply(null, deferredObjects).done(function () {
+        nowLoadingText.remove();
+
+        var beyGroup = project.importSVG(SVGcache['/img/bey01.svg']);
+        beyGroup.position = paper.view.center;
+        beyGroup.angle = 0; //custom property
+        beyGroup.scale(Math.min(paper.view.size.width, paper.view.size.height) * 0.9 / 300);
+
+        var baseGroup = beyGroup.children['base'];
+        var designGroup = beyGroup.children['design'];
         baseGroup.transformContent = true;
         designGroup.transformContent = true;
-
-        nowLoadingText.remove();
 
         connectingText = new paper.PointText({
             point: paper.view.center,
@@ -111,8 +128,15 @@ $(function () {
                 designGroup.fillColor = new paper.Color({ 'hue': baseGroup.fillColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
             }
 
-            var infoWindow = new paper.Rectangle([paper.view.size.width * 0.1, paper.view.size.height * 0.1], [paper.view.size.width * 0.8, paper.view.size.height * 0.8]);
-            var infoWindowRounded = new paper.Path.RoundRectangle(infoWindow, new paper.Size(10, 10));
+            var boundSize = Math.min(paper.view.size.width, paper.view.size.height) * 0.9;
+            var boundRectangle = new paper.Rectangle();
+            boundRectangle.size = [boundSize, boundSize];
+            boundRectangle.center = paper.view.center;
+
+            var infoWindow = new paper.Rectangle();
+            infoWindow.center = paper.view.center;
+            infoWindow.size = [600, 600];
+            var infoWindowRounded = new paper.Path.RoundRectangle(infoWindow, new paper.Size(20, 20));
             infoWindowRounded.fillColor = 'black';
             infoWindowRounded.opacity = 0.7;
 
@@ -120,15 +144,23 @@ $(function () {
             for (var i = 0; i < 3; i++) {
                 connectText[i] = new paper.PointText({ fillColor: 'white', justification: 'center' });
             }
-            connectText[0].content = '本日は駒場祭2013にお越しいただきありがとうございます。';
-            connectText[0].point = [paper.view.size.width * 0.5, paper.view.size.height * 0.2];
-            connectText[0].fontSize = 32;
-            connectText[1].content = '無事、あなたのベイが作成できました！';
-            connectText[1].point = [paper.view.size.width * 0.5, paper.view.size.height * 0.3];
-            connectText[1].fontSize = 60;
-            connectText[2].content = '続いて、端末の向きを判定します。';
-            connectText[2].point = [paper.view.size.width * 0.5, paper.view.size.height * 0.5];
-            connectText[2].fontSize = 48;
+            connectText[0].content = 'BayesianFighter';
+            connectText[0].point = infoWindow.center.add([0, -200]);
+            connectText[0].fontSize = 60;
+            connectText[1].content = '本日は駒場祭2013にお越しいただきありがとうございます。';
+            connectText[1].point = infoWindow.center.add([0, -120]);
+            connectText[1].fontSize = 18;
+            connectText[2].content = '注意(必ずご確認ください)\n\n●本コンテンツではWebSocketを使用した通信を行います。\nご利用の際の通信料は各自の負担となりますので予めご了承ください。\n\n●プレイに際しては、画面の自動回転をOFFにし、\n画面の点灯時間を長めに設定していただくと、\n快適にプレイしていただけます。';
+            connectText[2].point = infoWindow.center.add([0, -40]);
+            connectText[2].fontSize = 18;
+
+            var message01 = new paper.Group([infoWindowRounded, connectText[0], connectText[1], connectText[2]]);
+
+            message01.fitBounds(boundRectangle);
+
+            paper.view.onMouseDown = function (event) {
+                console.log(message01.remove());
+            };
 
             paper.view.draw();
         });
@@ -136,8 +168,8 @@ $(function () {
         paper.view.onFrame = function (event) {
             // var destAngle = Math.sin(event.time / 2) * 3000;
             var destAngle = event.time * 5;
-            bey_svg.rotate(destAngle - bey_svg.angle);
-            bey_svg.angle = destAngle;
+            beyGroup.rotate(destAngle - beyGroup.angle);
+            beyGroup.angle = destAngle;
         };
     });
 });
