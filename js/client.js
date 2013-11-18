@@ -8,7 +8,7 @@ $(function () {
 
     var project = new paper.Project(canvas);
 
-    var SVGURLs = ['/img/bey01.svg', '/img/message01.svg'];
+    var SVGURLs = ['/img/bey01.svg'];
     var SVGcache = {};
 
     nowLoadingText = new paper.PointText({
