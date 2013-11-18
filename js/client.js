@@ -11,6 +11,16 @@ $(function () {
     var SVGURLs = ['/img/bey01.svg'];
     var SVGcache = {};
 
+    var FPStext = new paper.PointText(new paper.Point(10, 20));
+    FPStext.fillColor = 'black';
+
+    FPS = 0;
+
+    setInterval(function () {
+        FPStext.content = 'FPS: ' + FPS;
+        FPS = 0;
+    }, 1000);
+
     nowLoadingText = new paper.PointText({
         point: paper.view.center,
         content: 'Now Loading...',
@@ -154,7 +164,21 @@ $(function () {
             connectText[2].point = infoWindow.center.add([0, -40]);
             connectText[2].fontSize = 18;
 
-            var message01 = new paper.Group([infoWindowRounded, connectText[0], connectText[1], connectText[2]]);
+            var bottun01 = new paper.Rectangle();
+            bottun01.center = infoWindow.center.add([0, 220]);
+            bottun01.size = [400, 100];
+            var bottun01Rounded = new paper.Path.RoundRectangle(bottun01, new paper.Size(20, 20));
+            bottun01Rounded.fillColor = 'white';
+
+            var bottunText01 = new paper.PointText({
+                fillColor: 'black',
+                justification: 'center',
+                position: bottun01Rounded.position.add([0, 20]),
+                fontSize: 48,
+                content: 'OK'
+            })
+
+            var message01 = new paper.Group([infoWindowRounded, connectText[0], connectText[1], connectText[2], bottun01Rounded, bottunText01]);
 
             message01.fitBounds(boundRectangle);
 
@@ -170,6 +194,7 @@ $(function () {
             var destAngle = event.time * 5;
             beyGroup.rotate(destAngle - beyGroup.angle);
             beyGroup.angle = destAngle;
+            FPS++;
         };
     });
 });
