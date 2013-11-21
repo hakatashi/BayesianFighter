@@ -315,7 +315,7 @@ var updateBeys = function () {
                 }
             }
         })
-        if (distanceBetween(bey.point, [0, 0]) > fieldSize - bey.size) {
+        if (distanceBetween(bey.point, [0, 0]) > fieldSize) {
             removeBey(bey.session);
             //bey.point = polarToRect((fieldSize - bey.size) * 2 - distanceBetween(bey.point, [0, 0]), rectToPolar(bey.point).theta);
             //bey.speed = polarToRect(distanceBetween(bey.speed, [0, 0]), 2 * rectToPolar(bey.point).theta - rectToPolar(bey.speed).theta + Math.PI);

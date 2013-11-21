@@ -63,13 +63,6 @@ $(function () {
             justification: 'center'
         });
 
-        setInterval(function () {
-            var message = Date();
-            $('#time').text(message);
-            socket.emit('info', message);
-            console.log(message);
-        }, 1000);
-
         var onResponce = function (message) {
             if (message) {
                 $("#res").html('Request Accepted.<br>' + $("#res").html());
@@ -103,6 +96,13 @@ $(function () {
             window01setup();
 
             paper.view.draw();
+
+            socket.removeAllListeners('establish');
+        });
+
+        socket.on('disconnect', function (message) {
+            project.activeLayer.removeChildren();
+            window06setup();
         });
 
         paper.view.onFrame = function (event) {
@@ -467,6 +467,34 @@ $(function () {
                 emergeRequest();
             }
         };
+    };
+
+    var window06setup = function () {
+        var boundSize = Math.min(paper.view.size.width, paper.view.size.height) * 0.85;
+        var boundRectangle = new paper.Rectangle();
+        boundRectangle.size = [boundSize, boundSize];
+        boundRectangle.center = paper.view.center;
+
+        var infoWindow = new paper.Rectangle();
+        infoWindow.center = paper.view.center;
+        infoWindow.size = [600, 600];
+        var infoWindowRounded = new paper.Path.RoundRectangle(infoWindow, new paper.Size(20, 20));
+        infoWindowRounded.fillColor = 'black';
+        infoWindowRounded.opacity = 0.6;
+
+        var connectText = [];
+        for (var i = 0; i < 1; i++) {
+            connectText[i] = new paper.PointText({ fillColor: 'white', justification: 'center' });
+        }
+        connectText[0].content = '接続が切断されました。\n電波状況を確認してもう一度お試しください。';
+        connectText[0].point = infoWindow.center.add([0, 0]);
+        connectText[0].fontSize = 24;
+
+        var message = new paper.Group([infoWindowRounded, connectText[0]]);
+
+        message.fitBounds(boundRectangle);
+
+        paper.view.draw();
     };
 
     deferredObjects = [];
