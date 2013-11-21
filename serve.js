@@ -329,7 +329,7 @@ var cpuThink = function () {
             if (distanceBetween(bey.speed, [0, 0]) > 5000) {
                 var speedVector = rectToPolar(bey.speed);
                 var sensorRect = polarToRect(8, speedVector.theta + Math.PI);
-                bey.sensor.x = -sensorRect[0];
+                bey.sensor.x = sensorRect[0];
                 bey.sensor.y = sensorRect[1];
                 return;
             }
@@ -337,12 +337,12 @@ var cpuThink = function () {
             if (distanceBetween(prospects, [0, 0]) > fieldSize || fieldSize - distanceBetween(bey.point,[0,0]) - bey.size < 100) {
                 var outerVector = rectToPolar(bey.point);
                 var sensorRect = polarToRect(8, outerVector.theta + Math.PI);
-                bey.sensor.x = -sensorRect[0];
+                bey.sensor.x = sensorRect[0];
                 bey.sensor.y = sensorRect[1];
                 return;
             }
             var sensorRect = polarToRect(5, Math.random() * Math.PI * 2);
-            bey.sensor.x = -sensorRect[0];
+            bey.sensor.x = sensorRect[0];
             bey.sensor.y = sensorRect[1];
         }
     });

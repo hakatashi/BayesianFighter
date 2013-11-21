@@ -101,7 +101,6 @@ $(function () {
             connectingText.remove();
 
             Math.seedrandom(socketid);
-            console.log(socketid);
             var mainColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
             if (Math.random() > 0.5) {
                 var accentColor = new paper.Color({ 'hue': mainColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': mainColor.brightness - Math.random() * 0.4 - 0.2 })
