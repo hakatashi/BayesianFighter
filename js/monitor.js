@@ -71,12 +71,12 @@ $(function () {
 
         //•`‰æ
         setInterval(function () {
+            for (var session in beyObjects) {
+                beyObjects[session].called = false; // custom property
+            }
+
             beys.forEach(function (bey) {
                 var beyLocate = new paper.Point(bey.point);
-
-                for (var beyObject in beyObjects) {
-                    beyObject.called = false; // custom property
-                }
 
                 if (beyObjects[bey.session]) {
                     beyObjects[bey.session].position = beyLocate.add(paper.view.center);
@@ -116,11 +116,12 @@ $(function () {
                     beyObjects[bey.session] = beyObject;
                     beyObjects[bey.session].called = true;
                 }
-
-                for (var beyObject in beyObjects) {
-                    if (beyObject.called == false) beyObject.remove();
-                }
             })
+
+            for (var session in beyObjects) {
+                if (beyObjects[session].called == false) beyObjects[session].remove();
+            }
+
             paper.view.draw();
             drawFPS++;
         }, 1000 / 60);
