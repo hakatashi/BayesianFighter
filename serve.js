@@ -156,7 +156,7 @@ var writeFromFile = function (req, res, locate) {
     });
 }
 
-app.listen(8080);
+app.listen(80);
 
 //必要なファイルを提供
 function handler (req, res) {
