@@ -79,21 +79,6 @@ $(function () {
             socket.removeListener('responce', onResponce);
         }
 
-        $("#emerge").click(function () {
-            socket.emit('emerge');
-            socket.on('responce', onResponce);
-        });
-
-        $("#exit").click(function () {
-            socket.emit('exit');
-            socket.on('responce', onResponce);
-        });
-
-        socket.on('dead', function (message) {
-            var data = JSON.parse(message);
-            $("#res").html('Youve Died. ' + data.surviveTime.toFixed(1) + ' second survived.<br>' + $("#res").html());
-        });
-
         socket.on('establish', function (message) {
             var data = JSON.parse(message);
             socketid = data.id;
@@ -266,7 +251,7 @@ $(function () {
         connectText[0].content = '端末の向き判定が完了しました！(dir=' + direction + ')\n端末を水平に戻してください。';
         connectText[0].point = infoWindow.center.add([0, -250]);
         connectText[0].fontSize = 28;
-        connectText[1].content = '以下の開始ボタンを押すとゲームに参加できます。';
+        connectText[1].content = 'ゲームに参加する準備が完了しました。\n以下の開始ボタンを押すとゲームに参加できます。';
         connectText[1].point = infoWindow.center.add([0, 0]);
         connectText[1].fontSize = 24;
 
@@ -326,7 +311,7 @@ $(function () {
                     sensor.y = gravity.y;
                     break;
                 case 1:
-                    sensor.x = gravity.y;
+                    sensor.x = -gravity.y;
                     sensor.y = -gravity.x;
                     break;
                 case 2:
@@ -334,7 +319,7 @@ $(function () {
                     sensor.y = -gravity.y;
                     break;
                 case 3:
-                    sensor.x = -gravity.y;
+                    sensor.x = gravity.y;
                     sensor.y = gravity.x;
                     break;
                 case 4:
@@ -356,7 +341,120 @@ $(function () {
         });
 
         socket.emit('emerge');
-        // socket.on('responce', onResponce);
+        socket.on('responce', function (message) {
+            var data = JSON.parse(message);
+            if (data != true) {
+                window04setup();
+            } else {
+                socket.on('dead', function (message) {
+                    var data = JSON.parse(message);
+                    window05setup(data);
+                });
+            }
+        });
+    };
+
+    var window04setup = function () {
+        var windowCreatedTime = (new Date);
+
+        var boundSize = Math.min(paper.view.size.width, paper.view.size.height) * 0.85;
+        var boundRectangle = new paper.Rectangle();
+        boundRectangle.size = [boundSize, boundSize];
+        boundRectangle.center = paper.view.center;
+
+        var infoWindow = new paper.Rectangle();
+        infoWindow.center = paper.view.center;
+        infoWindow.size = [600, 600];
+        var infoWindowRounded = new paper.Path.RoundRectangle(infoWindow, new paper.Size(20, 20));
+        infoWindowRounded.fillColor = 'black';
+        infoWindowRounded.opacity = 0.6;
+
+        var connectText = [];
+        for (var i = 0; i < 1; i++) {
+            connectText[i] = new paper.PointText({ fillColor: 'white', justification: 'center' });
+        }
+        connectText[0].content = 'システムが混雑しています。\n空いてる時間を見計らってもう一度お試しください。';
+        connectText[0].point = infoWindow.center.add([0, -50]);
+        connectText[0].fontSize = 20;
+
+        var bottun = new paper.Rectangle();
+        bottun.center = infoWindow.center.add([0, 220]);
+        bottun.size = [400, 100];
+        var bottunRounded = new paper.Path.RoundRectangle(bottun, new paper.Size(20, 20));
+        bottunRounded.fillColor = 'white';
+
+        var bottunText = new paper.PointText({
+            fillColor: 'black',
+            justification: 'center',
+            position: bottunRounded.position.add([0, 20]),
+            fontSize: 48,
+            content: '開始'
+        })
+
+        var message = new paper.Group([infoWindowRounded, connectText[0], bottunRounded, bottunText]);
+
+        message.fitBounds(boundRectangle);
+
+        bottunRounded.onMouseDown = function (event) {
+            if ((new Date) - windowCreatedTime > 1000) {
+                message.remove();
+                emergeRequest();
+            }
+        };
+    };
+
+    var window05setup = function (data) {
+        var windowCreatedTime = (new Date);
+
+        var boundSize = Math.min(paper.view.size.width, paper.view.size.height) * 0.85;
+        var boundRectangle = new paper.Rectangle();
+        boundRectangle.size = [boundSize, boundSize];
+        boundRectangle.center = paper.view.center;
+
+        var infoWindow = new paper.Rectangle();
+        infoWindow.center = paper.view.center;
+        infoWindow.size = [600, 600];
+        var infoWindowRounded = new paper.Path.RoundRectangle(infoWindow, new paper.Size(20, 20));
+        infoWindowRounded.fillColor = 'black';
+        infoWindowRounded.opacity = 0.6;
+
+        var connectText = [];
+        for (var i = 0; i < 2; i++) {
+            connectText[i] = new paper.PointText({ fillColor: 'white', justification: 'center' });
+        }
+        connectText[0].content = '残念！やられてしまいました。';
+        connectText[0].point = infoWindow.center.add([0, -200]);
+        connectText[0].fontSize = 36;
+        connectText[1].content = data.surviveTime.toFixed(1) + '秒間、生存しました。';
+        connectText[1].point = infoWindow.center.add([0, 0]);
+        connectText[1].fontSize = 24;
+
+        console.log(JSON.stringify(data));
+
+        var bottun = new paper.Rectangle();
+        bottun.center = infoWindow.center.add([0, 220]);
+        bottun.size = [400, 100];
+        var bottunRounded = new paper.Path.RoundRectangle(bottun, new paper.Size(20, 20));
+        bottunRounded.fillColor = 'white';
+
+        var bottunText = new paper.PointText({
+            fillColor: 'black',
+            justification: 'center',
+            position: bottunRounded.position.add([0, 20]),
+            fontSize: 48,
+            content: 'もう一度開始'
+        })
+
+        var message = new paper.Group([infoWindowRounded, connectText[0], connectText[1], bottunRounded, bottunText]);
+
+        message.fitBounds(boundRectangle);
+
+        bottunRounded.onMouseDown = function (event) {
+            if ((new Date) - windowCreatedTime > 1000) {
+                message.remove();
+                emergeRequest();
+            }
+        };
     };
 
     deferredObjects = [];

@@ -3,7 +3,7 @@ var io = require('socket.io').listen(app);
 var fs = require('fs');
 var path = require('path');
 
-var renderFPS = 60;
+var renderFPS = 30;
 var worldFPS = 180;
 var cpuThinkFPS = 3;
 var fieldState;
@@ -183,10 +183,10 @@ io.of('/send').on('connection', function (socket) {
         if (createBey(socket.id, 30)) {
             console.log('sender: ' + socket.id + ': emerge request accepted: ' + JSON.stringify(message));
             clients[socket.id] = socket;
-            socket.emit('responce', true);
+            socket.emit('responce', JSON.stringify(true));
         } else {
             console.log('sender: ' + socket.id + ': emerge request denied: ' + JSON.stringify(message));
-            socket.emit('responce', false);
+            socket.emit('responce', JSON.stringify(false));
         }
     });
     //消去リクエスト
