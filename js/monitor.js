@@ -51,13 +51,28 @@ $(function () {
     setInterval(function () {
         removeAllCircles();
         beys.forEach(function (bey) {
-            Math.seedrandom(bey.session);
-            bey.hue = Math.random() * 360;
-            bey.saturation = 0.6 + Math.random() * 0.4;
-            bey.brightness = 0.4 + Math.random() * 0.6;
             var beyLocate = new paper.Point(bey.point);
+
+            Math.seedrandom(bey.session);
+            var mainColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
+            if (Math.random() > 0.5) {
+                var accentColor = new paper.Color({ 'hue': mainColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': mainColor.brightness - Math.random() * 0.4 - 0.2 })
+            } else {
+                var accentColor = new paper.Color({ 'hue': mainColor.hue + Math.random() * 30 + 20, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 })
+            }
+            if (Math.random() > 0.5) {
+                baseColor = mainColor;
+                designColor = accentColor;
+            } else {
+                baseColor = accentColor;
+                designColor = mainColor;
+            }
+
             var tempCircle = new paper.Path.Circle(beyLocate.add(paper.view.center), bey.size);
-            tempCircle.fillColor = new paper.Color({ 'hue': bey.hue, 'saturation': bey.saturation, 'brightness': bey.brightness });
+            tempCircle.fillColor = new paper.Color(baseColor);
+            beyCircles.push(tempCircle);
+            var tempCircle = new paper.Path.Circle(beyLocate.add(paper.view.center), bey.size/2);
+            tempCircle.fillColor = new paper.Color(designColor);
             beyCircles.push(tempCircle);
         })
         paper.view.draw();

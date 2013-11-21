@@ -45,7 +45,7 @@ $(function () {
     var setup = function () {
         nowLoadingText.remove();
 
-        var beyGroup = project.importSVG(SVGcache['/img/bey01.svg']);
+        beyGroup = project.importSVG(SVGcache['/img/bey01.svg']);
         beyGroup.position = paper.view.center;
         beyGroup.angle = 0; //custom property
         beyGroup.scale(Math.min(paper.view.size.width, paper.view.size.height) * 0.9 / 300);
@@ -69,25 +69,6 @@ $(function () {
             socket.emit('info', message);
             console.log(message);
         }, 1000);
-
-        window.addEventListener('devicemotion', function (e) {
-            var gravity = e.accelerationIncludingGravity;
-            $("#gravity").text('重力加速度: ' + gravity.x + ', ' + gravity.y + ', ' + gravity.z);
-
-            socket.emit('sensor', JSON.stringify(gravity));
-
-            if (typeof (e.acceleration.x) != "undefined") {
-                $("#info").text("加速度センサが利用できます");
-            }
-
-            var accel = e.acceleration;
-            $("#accel").text('加速度: ' + accel.x + ', ' + accel.y + ', ' + accel.z);
-
-            var rotation = e.rotationRate;
-            $("#rotation").text('回転加速度: ' + rotation.x + ', ' + rotation.y + ', ' + rotation.z);
-
-            paper.view.draw();
-        });
 
         var onResponce = function (message) {
             if (message) {
@@ -141,11 +122,10 @@ $(function () {
         });
 
         paper.view.onFrame = function (event) {
-            var destAngle = Math.sin(event.time / 2) * 300 - event.time * 1000;
-            // var destAngle = event.time * -5;
+            // var destAngle = Math.sin(event.time / 2) * 300 - event.time * 1000;
+            var destAngle = event.time * -5;
             beyGroup.rotate(destAngle - beyGroup.angle);
             beyGroup.angle = destAngle;
-            beyGroup.position = paper.view.center;
             FPS++;
         };
     };
@@ -281,12 +261,15 @@ $(function () {
         infoWindowRounded.opacity = 0.6;
 
         var connectText = [];
-        for (var i = 0; i < 1; i++) {
+        for (var i = 0; i < 2; i++) {
             connectText[i] = new paper.PointText({ fillColor: 'white', justification: 'center' });
         }
         connectText[0].content = '端末の向き判定が完了しました！(dir=' + direction + ')\n端末を水平に戻してください。';
         connectText[0].point = infoWindow.center.add([0, -250]);
         connectText[0].fontSize = 28;
+        connectText[1].content = '以下の開始ボタンを押すとゲームに参加できます。';
+        connectText[1].point = infoWindow.center.add([0, 0]);
+        connectText[1].fontSize = 24;
 
         var bottun03 = new paper.Rectangle();
         bottun03.center = infoWindow.center.add([0, 220]);
@@ -302,13 +285,14 @@ $(function () {
             content: '開始'
         })
 
-        var message03 = new paper.Group([infoWindowRounded, connectText[0], bottun03Rounded, bottunText03]);
+        var message03 = new paper.Group([infoWindowRounded, connectText[0], connectText[1], bottun03Rounded, bottunText03]);
 
         message03.fitBounds(boundRectangle);
 
         bottun03Rounded.onMouseDown = function (event) {
             if ((new Date) - windowCreatedTime > 1000) {
                 message03.remove();
+                emergeRequest();
             }
         };
     };
@@ -329,6 +313,51 @@ $(function () {
         window.removeEventListener('devicemotion', judgeDirection);
         processingText.remove();
         window03setup();
+    };
+
+    var emergeRequest = function () {
+        window.addEventListener('devicemotion', function (e) {
+            var gravity = e.accelerationIncludingGravity;
+
+            var sensor = {};
+
+            switch (direction) {
+                case 0:
+                    sensor.x = -gravity.x;
+                    sensor.y = gravity.y;
+                    break;
+                case 1:
+                    sensor.x = gravity.y;
+                    sensor.y = -gravity.x;
+                    break;
+                case 2:
+                    sensor.x = gravity.x;
+                    sensor.y = -gravity.y;
+                    break;
+                case 3:
+                    sensor.x = -gravity.y;
+                    sensor.y = gravity.x;
+                    break;
+                case 4:
+                    sensor.x = -gravity.x;
+                    sensor.y = gravity.y;
+                    break;
+                case 5:
+                    sensor.x = -gravity.x;
+                    sensor.y = gravity.y;
+                    break;
+            }
+
+            socket.emit('sensor', JSON.stringify(sensor));
+
+            var minScreen = Math.min(paper.view.size.width, paper.view.size.height);
+            beyGroup.position = paper.view.center.add([minScreen / 2 / 10 * sensor.x, minScreen / 2 / 10 * sensor.y]);
+
+            paper.view.draw();
+        });
+
+        socket.emit('emerge');
+        // socket.on('responce', onResponce);
     };
 
     deferredObjects = [];
