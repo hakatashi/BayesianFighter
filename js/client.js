@@ -306,50 +306,13 @@ $(function () {
     };
 
     var emergeRequest = function () {
-        window.addEventListener('devicemotion', function (e) {
-            var gravity = e.accelerationIncludingGravity;
-
-            var sensor = {};
-
-            switch (direction) {
-                case 0:
-                    sensor.x = -gravity.x;
-                    sensor.y = gravity.y;
-                    break;
-                case 1:
-                    sensor.x = -gravity.y;
-                    sensor.y = -gravity.x;
-                    break;
-                case 2:
-                    sensor.x = gravity.x;
-                    sensor.y = -gravity.y;
-                    break;
-                case 3:
-                    sensor.x = gravity.y;
-                    sensor.y = gravity.x;
-                    break;
-                case 4:
-                    sensor.x = -gravity.x;
-                    sensor.y = gravity.y;
-                    break;
-                case 5:
-                    sensor.x = -gravity.x;
-                    sensor.y = gravity.y;
-                    break;
-            }
-
-            socket.emit('sensor', JSON.stringify(sensor));
-
-            var minScreen = Math.min(paper.view.size.width, paper.view.size.height);
-            beyGroup.position = paper.view.center.add([minScreen / 2 / 10 * sensor.x, minScreen / 2 / 10 * sensor.y]);
-
-            paper.view.draw();
-        });
+        window.addEventListener('devicemotion', onDevicemotion);
 
         socket.emit('emerge');
         socket.on('responce', function (message) {
             var data = JSON.parse(message);
             if (data != true) {
+                window.removeEventListener('devicemotion', onDevicemotion);
                 window04setup();
             } else {
                 socket.on('dead', onDead);
@@ -358,9 +321,50 @@ $(function () {
         });
     };
 
+    var onDevicemotion = function (e) {
+        var gravity = e.accelerationIncludingGravity;
+
+        var sensor = {};
+
+        switch (direction) {
+            case 0:
+                sensor.x = -gravity.x;
+                sensor.y = gravity.y;
+                break;
+            case 1:
+                sensor.x = -gravity.y;
+                sensor.y = -gravity.x;
+                break;
+            case 2:
+                sensor.x = gravity.x;
+                sensor.y = -gravity.y;
+                break;
+            case 3:
+                sensor.x = gravity.y;
+                sensor.y = gravity.x;
+                break;
+            case 4:
+                sensor.x = -gravity.x;
+                sensor.y = gravity.y;
+                break;
+            case 5:
+                sensor.x = -gravity.x;
+                sensor.y = gravity.y;
+                break;
+        }
+
+        socket.emit('sensor', JSON.stringify(sensor));
+
+        var minScreen = Math.min(paper.view.size.width, paper.view.size.height);
+        beyGroup.position = paper.view.center.add([minScreen / 2 / 10 * sensor.x, minScreen / 2 / 10 * sensor.y]);
+
+        paper.view.draw();
+    };
+
     var onDead = function (message) {
         var data = JSON.parse(message);
         socket.removeListener('dead', onDead);
+        window.removeEventListener('devicemotion', onDevicemotion);
         window05setup(data);
     };
 
