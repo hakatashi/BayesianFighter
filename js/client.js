@@ -130,12 +130,18 @@ $(function () {
 
             Math.seedrandom(socketid);
             console.log(socketid);
+            var mainColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
             if (Math.random() > 0.5) {
-                baseGroup.fillColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
-                designGroup.fillColor = new paper.Color({ 'hue': baseGroup.fillColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.1 + Math.random() * 0.5 });
+                var accentColor = new paper.Color({ 'hue': mainColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': mainColor.brightness - Math.random() * 0.4 - 0.2 })
             } else {
-                baseGroup.fillColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.1 + Math.random() * 0.5 });
-                designGroup.fillColor = new paper.Color({ 'hue': baseGroup.fillColor.hue + Math.random() * 100 - 50, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
+                var accentColor = new paper.Color({ 'hue': mainColor.hue + Math.random() * 30 + 20, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 })
+            }
+            if (Math.random() > 0.5) {
+                baseGroup.fillColor = mainColor;
+                designGroup.fillColor = accentColor;
+            } else {
+                baseGroup.fillColor = accentColor;
+                designGroup.fillColor = mainColor;
             }
 
             var boundSize = Math.min(paper.view.size.width, paper.view.size.height) * 0.9;
@@ -191,7 +197,7 @@ $(function () {
 
         paper.view.onFrame = function (event) {
             // var destAngle = Math.sin(event.time / 2) * 3000;
-            var destAngle = event.time * 5;
+            var destAngle = event.time * -5;
             beyGroup.rotate(destAngle - beyGroup.angle);
             beyGroup.angle = destAngle;
             FPS++;
