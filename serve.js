@@ -21,7 +21,7 @@ var latestCpuEmergeFrame = 0;
 var frame = 0;
 var clients = {};
 
-var allowedAccesses = ["/js/client.js", "/monitor", "/js/monitor.js", "/js/paper.min.js", "/img/bey01.svg", "/img/message01.svg"];
+var allowedAccesses = ["/js/client.js", "/monitor", "/js/monitor.js", "/js/paper.min.js", "/img/bey01.svg", "/img/message01.svg", "/img/img01.svg"];
 
 var mimeTypes = {
     "html": "text/html; charset=utf-8",
