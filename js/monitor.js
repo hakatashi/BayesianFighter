@@ -26,6 +26,10 @@ $(function () {
 
     var beyObjects = {};
 
+    var project = new paper.Project(canvas);
+
+    var setupTime = (new Date);
+
     nowLoadingText = new paper.PointText({
         point: paper.view.center,
         content: 'Now Loading...',
@@ -79,9 +83,22 @@ $(function () {
                 var beyLocate = new paper.Point(bey.point);
 
                 if (beyObjects[bey.session]) {
+                    var elapsedTime = ((new Date) - setupTime) / 1000;
+                    var destAngle = Math.sin(elapsedTime / 2) * 500 - elapsedTime * 2000;
+
                     beyObjects[bey.session].position = beyLocate.add(paper.view.center);
                     beyObjects[bey.session].called = true;
+                    beyObjects[bey.session].rotate(destAngle - beyObjects[bey.session].angle);
+                    beyObjects[bey.session].angle = destAngle;
                 } else {
+                    var beyObject = project.importSVG(SVGcache['/img/bey01.svg']);
+                    var baseGroup = beyObject.children['base'];
+                    var designGroup = beyObject.children['design'];
+
+                    beyObject.position = beyLocate.add(paper.view.center);
+                    beyObject.scale(bey.size / 150);
+                    beyObject.angle = 0; // custom property
+
                     Math.seedrandom(bey.session);
                     var mainColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
                     if (Math.random() > 0.5) {
@@ -104,14 +121,8 @@ $(function () {
                         designColor.brightness = Math.max(designColor.brightness - 0.4, 0);
                     }
 
-                    var baseCircle = new paper.Path.Circle(beyLocate.add(paper.view.center), bey.size);
-                    baseCircle.fillColor = new paper.Color(baseColor);
-                    beyCircles.push(baseCircle);
-                    var designCircle = new paper.Path.Circle(beyLocate.add(paper.view.center), bey.size / 2);
-                    designCircle.fillColor = new paper.Color(designColor);
-                    beyCircles.push(designCircle);
-
-                    var beyObject = new paper.Group([baseCircle, designCircle]);
+                    baseGroup.fillColor = new paper.Color(baseColor);
+                    designGroup.fillColor = new paper.Color(designColor);
 
                     beyObjects[bey.session] = beyObject;
                     beyObjects[bey.session].called = true;
