@@ -141,25 +141,27 @@ $(function () {
         connectText[2].point = infoWindow.center.add([0, -40]);
         connectText[2].fontSize = 18;
 
-        var bottun01 = new paper.Rectangle();
-        bottun01.center = infoWindow.center.add([0, 220]);
-        bottun01.size = [400, 100];
-        var bottun01Rounded = new paper.Path.RoundRectangle(bottun01, new paper.Size(20, 20));
-        bottun01Rounded.fillColor = 'white';
+        var button01 = new paper.Rectangle();
+        button01.center = infoWindow.center.add([0, 220]);
+        button01.size = [400, 100];
+        var button01Rounded = new paper.Path.RoundRectangle(button01, new paper.Size(20, 20));
+        button01Rounded.fillColor = 'white';
 
-        var bottunText01 = new paper.PointText({
+        var buttonText01 = new paper.PointText({
             fillColor: 'black',
             justification: 'center',
-            position: bottun01Rounded.position.add([0, 20]),
+            position: button01Rounded.position.add([0, 20]),
             fontSize: 48,
             content: 'OK'
         })
 
-        var message01 = new paper.Group([infoWindowRounded, connectText[0], connectText[1], connectText[2], bottun01Rounded, bottunText01]);
+        var buttonGroup = new paper.Group([button01Rounded, buttonText01]);
+
+        var message01 = new paper.Group([infoWindowRounded, connectText[0], connectText[1], connectText[2], buttonGroup]);
 
         message01.fitBounds(boundRectangle);
 
-        bottun01Rounded.onMouseDown = function (event) {
+        buttonGroup.onMouseDown = function (event) {
             message01.remove();
             window02setup();
         };
@@ -193,25 +195,27 @@ $(function () {
         img01.scale(350 / 600);
         img01.position = infoWindow.center.add([0, -30]);
 
-        var bottun02 = new paper.Rectangle();
-        bottun02.center = infoWindow.center.add([0, 220]);
-        bottun02.size = [400, 100];
-        var bottun02Rounded = new paper.Path.RoundRectangle(bottun02, new paper.Size(20, 20));
-        bottun02Rounded.fillColor = 'white';
+        var button02 = new paper.Rectangle();
+        button02.center = infoWindow.center.add([0, 220]);
+        button02.size = [400, 100];
+        var button02Rounded = new paper.Path.RoundRectangle(button02, new paper.Size(20, 20));
+        button02Rounded.fillColor = 'white';
 
-        var bottunText01 = new paper.PointText({
+        var buttonText01 = new paper.PointText({
             fillColor: 'black',
             justification: 'center',
-            position: bottun02Rounded.position.add([0, 20]),
+            position: button02Rounded.position.add([0, 20]),
             fontSize: 48,
             content: 'OK'
         })
 
-        var message02 = new paper.Group([infoWindowRounded, connectText[0], bottun02Rounded, bottunText01, img01]);
+        var buttonGroup = new paper.Group([button02Rounded, buttonText01]);
+
+        var message02 = new paper.Group([infoWindowRounded, connectText[0], buttonGroup, img01]);
 
         message02.fitBounds(boundRectangle);
 
-        bottun02Rounded.onMouseDown = function (event) {
+        buttonGroup.onMouseDown = function (event) {
             if ((new Date) - windowCreatedTime > 1000) {
                 message02.remove();
 
@@ -255,25 +259,27 @@ $(function () {
         connectText[1].point = infoWindow.center.add([0, 0]);
         connectText[1].fontSize = 24;
 
-        var bottun03 = new paper.Rectangle();
-        bottun03.center = infoWindow.center.add([0, 220]);
-        bottun03.size = [400, 100];
-        var bottun03Rounded = new paper.Path.RoundRectangle(bottun03, new paper.Size(20, 20));
-        bottun03Rounded.fillColor = 'white';
+        var button03 = new paper.Rectangle();
+        button03.center = infoWindow.center.add([0, 220]);
+        button03.size = [400, 100];
+        var button03Rounded = new paper.Path.RoundRectangle(button03, new paper.Size(20, 20));
+        button03Rounded.fillColor = 'white';
 
-        var bottunText03 = new paper.PointText({
+        var buttonText03 = new paper.PointText({
             fillColor: 'black',
             justification: 'center',
-            position: bottun03Rounded.position.add([0, 20]),
+            position: button03Rounded.position.add([0, 20]),
             fontSize: 48,
             content: '開始'
         })
 
-        var message03 = new paper.Group([infoWindowRounded, connectText[0], connectText[1], bottun03Rounded, bottunText03]);
+        var buttonGroup = new paper.Group([button03Rounded, buttonText03]);
+
+        var message03 = new paper.Group([infoWindowRounded, connectText[0], connectText[1], buttonGroup]);
 
         message03.fitBounds(boundRectangle);
 
-        bottun03Rounded.onMouseDown = function (event) {
+        buttonGroup.onMouseDown = function (event) {
             if ((new Date) - windowCreatedTime > 1000) {
                 message03.remove();
                 emergeRequest();
@@ -346,12 +352,16 @@ $(function () {
             if (data != true) {
                 window04setup();
             } else {
-                socket.on('dead', function (message) {
-                    var data = JSON.parse(message);
-                    window05setup(data);
-                });
+                socket.on('dead', onDead);
             }
+            socket.removeAllListeners('responce');
         });
+    };
+
+    var onDead = function (message) {
+        var data = JSON.parse(message);
+        socket.removeListener('dead', onDead);
+        window05setup(data);
     };
 
     var window04setup = function () {
@@ -377,25 +387,27 @@ $(function () {
         connectText[0].point = infoWindow.center.add([0, -50]);
         connectText[0].fontSize = 20;
 
-        var bottun = new paper.Rectangle();
-        bottun.center = infoWindow.center.add([0, 220]);
-        bottun.size = [400, 100];
-        var bottunRounded = new paper.Path.RoundRectangle(bottun, new paper.Size(20, 20));
-        bottunRounded.fillColor = 'white';
+        var button = new paper.Rectangle();
+        button.center = infoWindow.center.add([0, 220]);
+        button.size = [400, 100];
+        var buttonRounded = new paper.Path.RoundRectangle(button, new paper.Size(20, 20));
+        buttonRounded.fillColor = 'white';
 
-        var bottunText = new paper.PointText({
+        var buttonText = new paper.PointText({
             fillColor: 'black',
             justification: 'center',
-            position: bottunRounded.position.add([0, 20]),
+            position: buttonRounded.position.add([0, 20]),
             fontSize: 48,
             content: '開始'
-        })
+        });
 
-        var message = new paper.Group([infoWindowRounded, connectText[0], bottunRounded, bottunText]);
+        var buttonGroup = new paper.Group([buttonRounded, buttonText]);
+
+        var message = new paper.Group([infoWindowRounded, connectText[0], buttonGroup]);
 
         message.fitBounds(boundRectangle);
 
-        bottunRounded.onMouseDown = function (event) {
+        buttonGroup.onMouseDown = function (event) {
             if ((new Date) - windowCreatedTime > 1000) {
                 message.remove();
                 emergeRequest();
@@ -429,27 +441,27 @@ $(function () {
         connectText[1].point = infoWindow.center.add([0, 0]);
         connectText[1].fontSize = 24;
 
-        console.log(JSON.stringify(data));
+        var button = new paper.Rectangle();
+        button.center = infoWindow.center.add([0, 220]);
+        button.size = [400, 100];
+        var buttonRounded = new paper.Path.RoundRectangle(button, new paper.Size(20, 20));
+        buttonRounded.fillColor = 'white';
 
-        var bottun = new paper.Rectangle();
-        bottun.center = infoWindow.center.add([0, 220]);
-        bottun.size = [400, 100];
-        var bottunRounded = new paper.Path.RoundRectangle(bottun, new paper.Size(20, 20));
-        bottunRounded.fillColor = 'white';
-
-        var bottunText = new paper.PointText({
+        var buttonText = new paper.PointText({
             fillColor: 'black',
             justification: 'center',
-            position: bottunRounded.position.add([0, 20]),
+            position: buttonRounded.position.add([0, 20]),
             fontSize: 48,
             content: 'もう一度開始'
         })
 
-        var message = new paper.Group([infoWindowRounded, connectText[0], connectText[1], bottunRounded, bottunText]);
+        var buttonGroup = new paper.Group([buttonRounded, buttonText]);
+
+        var message = new paper.Group([infoWindowRounded, connectText[0], connectText[1], buttonGroup]);
 
         message.fitBounds(boundRectangle);
 
-        bottunRounded.onMouseDown = function (event) {
+        buttonGroup.onMouseDown = function (event) {
             if ((new Date) - windowCreatedTime > 1000) {
                 message.remove();
                 emergeRequest();

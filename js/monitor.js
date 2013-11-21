@@ -68,6 +68,13 @@ $(function () {
                 designColor = mainColor;
             }
 
+            if (bey.isCPU == true) {
+                baseColor.saturation = 0;
+                designColor.saturation = 0;
+                baseColor.brightness = Math.max(baseColor.brightness - 0.4, 0);
+                designColor.brightness = Math.max(designColor.brightness - 0.4, 0);
+            }
+
             var tempCircle = new paper.Path.Circle(beyLocate.add(paper.view.center), bey.size);
             tempCircle.fillColor = new paper.Color(baseColor);
             beyCircles.push(tempCircle);

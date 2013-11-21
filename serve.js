@@ -3,7 +3,7 @@ var io = require('socket.io').listen(app);
 var fs = require('fs');
 var path = require('path');
 
-var renderFPS = 30;
+var renderFPS = 60;
 var worldFPS = 180;
 var cpuThinkFPS = 3;
 var fieldState;
