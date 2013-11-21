@@ -141,8 +141,8 @@ $(function () {
         });
 
         paper.view.onFrame = function (event) {
-            // var destAngle = Math.sin(event.time / 2) * 3000;
-            var destAngle = event.time * -5;
+            var destAngle = Math.sin(event.time / 2) * 300 - event.time * 1000;
+            // var destAngle = event.time * -5;
             beyGroup.rotate(destAngle - beyGroup.angle);
             beyGroup.angle = destAngle;
             beyGroup.position = paper.view.center;
@@ -202,7 +202,7 @@ $(function () {
     };
 
     var window02setup = function () {
-        var window02CreatedTime = (new Date);
+        var windowCreatedTime = (new Date);
 
         var boundSize = Math.min(paper.view.size.width, paper.view.size.height) * 0.85;
         var boundRectangle = new paper.Rectangle();
@@ -248,14 +248,87 @@ $(function () {
         message02.fitBounds(boundRectangle);
 
         bottun02Rounded.onMouseDown = function (event) {
-            if ((new Date) - window02CreatedTime > 500) {
+            if ((new Date) - windowCreatedTime > 1000) {
                 message02.remove();
+
+                processingText = new paper.PointText({
+                    point: paper.view.center,
+                    content: 'Processing...',
+                    fillColor: 'red',
+                    fontSize: 24,
+                    justification: 'center'
+                });
+
+                paper.view.draw();
+                window.addEventListener('devicemotion', judgeDirection);
             }
         };
     };
 
-    var judgeDirection = function () {
+    var window03setup = function () {
+        var windowCreatedTime = (new Date);
+
+        var boundSize = Math.min(paper.view.size.width, paper.view.size.height) * 0.85;
+        var boundRectangle = new paper.Rectangle();
+        boundRectangle.size = [boundSize, boundSize];
+        boundRectangle.center = paper.view.center;
+
+        var infoWindow = new paper.Rectangle();
+        infoWindow.center = paper.view.center;
+        infoWindow.size = [600, 600];
+        var infoWindowRounded = new paper.Path.RoundRectangle(infoWindow, new paper.Size(20, 20));
+        infoWindowRounded.fillColor = 'black';
+        infoWindowRounded.opacity = 0.6;
+
+        var connectText = [];
+        for (var i = 0; i < 1; i++) {
+            connectText[i] = new paper.PointText({ fillColor: 'white', justification: 'center' });
+        }
+        connectText[0].content = '端末の向き判定が完了しました！(dir=' + direction + ')\n端末を水平に戻してください。';
+        connectText[0].point = infoWindow.center.add([0, -250]);
+        connectText[0].fontSize = 28;
+
+        var bottun03 = new paper.Rectangle();
+        bottun03.center = infoWindow.center.add([0, 220]);
+        bottun03.size = [400, 100];
+        var bottun03Rounded = new paper.Path.RoundRectangle(bottun03, new paper.Size(20, 20));
+        bottun03Rounded.fillColor = 'white';
+
+        var bottunText03 = new paper.PointText({
+            fillColor: 'black',
+            justification: 'center',
+            position: bottun03Rounded.position.add([0, 20]),
+            fontSize: 48,
+            content: '開始'
+        })
+
+        var message03 = new paper.Group([infoWindowRounded, connectText[0], bottun03Rounded, bottunText03]);
+
+        message03.fitBounds(boundRectangle);
+
+        bottun03Rounded.onMouseDown = function (event) {
+            if ((new Date) - windowCreatedTime > 1000) {
+                message03.remove();
+            }
+        };
+    };
+
+    var judgeDirection = function (e) {
         var gravity = e.accelerationIncludingGravity;
+        var maxDirection = Math.max(Math.abs(gravity.x), Math.abs(gravity.y), Math.abs(gravity.z));
+        if (Math.abs(gravity.x) >= Math.abs(gravity.y) && Math.abs(gravity.x) >= Math.abs(gravity.z)) {
+            if (gravity.x > 0) direction = 3;
+            else direction = 1;
+        } else if (Math.abs(gravity.y) >= Math.abs(gravity.z)) {
+            if (gravity.y > 0) direction = 0;
+            else direction = 2;
+        } else if (maxDirection == Math.abs(gravity.z)) {
+            if (gravity.z > 0) direction = 4;
+            else direction = 5;
+        }
+        window.removeEventListener('devicemotion', judgeDirection);
+        processingText.remove();
+        window03setup();
     };
 
     deferredObjects = [];

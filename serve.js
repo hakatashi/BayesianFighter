@@ -274,7 +274,7 @@ var updateBeys = function () {
         if (speedPolar.r >= friction) bey.speed = polarToRect(speedPolar.r - friction, speedPolar.theta);
         else bey.speed = [0, 0];
         //センサー値を反映して加速
-        bey.speed[0] += -bey.sensor.x * speed;
+        bey.speed[0] += bey.sensor.x * speed;
         bey.speed[1] += bey.sensor.y * speed;
         bey.point[0] += bey.speed[0] / worldFPS;
         bey.point[1] += bey.speed[1] / worldFPS;
