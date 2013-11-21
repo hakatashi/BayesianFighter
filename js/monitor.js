@@ -130,7 +130,10 @@ $(function () {
             })
 
             for (var session in beyObjects) {
-                if (beyObjects[session].called == false) beyObjects[session].remove();
+                if (beyObjects[session].called == false) {
+                    beyObjects[session].remove();
+                    delete beyObjects[session];
+                }
             }
 
             paper.view.draw();
