@@ -9,7 +9,7 @@ var cpuThinkFPS = 3;
 var fieldState;
 var beyList = new Array();
 var maxBeys = 15;
-var stdBeys = 10;
+var stdBeys = 8;
 var cpuMinEmergeTime = 3;
 var fieldSize = 500;
 var speed = 0.8;

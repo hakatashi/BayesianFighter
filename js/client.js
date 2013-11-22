@@ -454,10 +454,10 @@ $(function () {
         var buttonText = new paper.PointText({
             fillColor: 'black',
             justification: 'center',
-            position: buttonRounded.position.add([0, 20]),
+            position: infoWindow.center.add([0, 240]),
             fontSize: 48,
             content: 'もう一度開始'
-        })
+        });
 
         var buttonGroup = new paper.Group([buttonRounded, buttonText]);
 
