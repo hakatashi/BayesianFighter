@@ -43,6 +43,8 @@ var BeyObject = function (point, size, session, isCPU) {
     this.sensor = { 'x': 0, 'y': 0, 'z': 0 };
     this.weight = 100;
     this.emergeTime = frame;
+    this.lastContact = '';
+    this.bastedBeys = 0;
 }
 
 function sessionExistsInBeyList(session) {
@@ -97,9 +99,13 @@ function removeBey(session) {
             console.log(clients[session]);
             if (!(beyList[i].isCPU)) {
                 clients[session].emit('dead', JSON.stringify({
-                    'surviveTime': (frame - beyList[i].emergeTime) / worldFPS
+                    'surviveTime': (frame - beyList[i].emergeTime) / worldFPS,
+                    'bastedBeys': beyList[i].bastedBeys
                 }));
             }
+            beyList.forEach(function (bey) {
+                if (bey.session == beyList[i].lastContact) bey.bastedBeys++;
+            })
             beyList.splice(i, 1);
             return true;
         }
@@ -312,6 +318,9 @@ var updateBeys = function () {
 
                     bey.speed = [bey.speed[0] - repulsePower[0], bey.speed[1] - repulsePower[1]];
                     objBey.speed = [objBey.speed[0] + repulsePower[0], objBey.speed[1] + repulsePower[1]];
+
+                    bey.lastContact = objBey.session;
+                    objBey.lastContact = bey.session;
                 }
             }
         })

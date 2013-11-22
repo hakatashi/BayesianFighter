@@ -441,7 +441,7 @@ $(function () {
         connectText[0].content = '残念！やられてしまいました。';
         connectText[0].point = infoWindow.center.add([0, -200]);
         connectText[0].fontSize = 36;
-        connectText[1].content = data.surviveTime.toFixed(1) + '秒間、生存しました。';
+        connectText[1].content = data.surviveTime.toFixed(1) + '秒間、生存しました。\n' + data.bastedBeys + '個のベイを倒しました。';
         connectText[1].point = infoWindow.center.add([0, 0]);
         connectText[1].fontSize = 24;
 
