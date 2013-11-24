@@ -164,6 +164,8 @@ var writeFromFile = function (req, res, locate) {
 
 app.listen(80);
 
+io.set('log level', 1);
+
 //必要なファイルを提供
 function handler (req, res) {
     var urlinfo = require('url').parse(req.url, true);
