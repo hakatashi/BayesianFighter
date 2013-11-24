@@ -145,9 +145,12 @@ $(function () {
             }
             
             emergeEffects.forEach( function (emergeEffect) {
-                emergeEffect.strokeColor.alpha -= 0.05;
-                emergeEffect.scale(1.06);
-                if (emergeEffect.strokeColor.alpha <= 0) emergeEffect.remove();
+                emergeEffect.strokeColor.alpha -= 0.03;
+                emergeEffect.scale(1 + emergeEffect.strokeColor.alpha * 0.1);
+                if (emergeEffect.strokeColor.alpha <= 0) {
+                    emergeEffect.remove();
+                    emergeEffects.splice(emergeEffects.indexOf(emergeEffect), 1);
+                }
             });
 
             paper.view.draw();
