@@ -151,7 +151,7 @@ $(function () {
                     
                     beyObjects[session].rotate(destAngle - beyObjects[session].angle);
                     beyObjects[session].angle = destAngle;
-                    beyObjects[session].position = beyObjects[session].position.add([beyObjects[session].speed[0] / 180, beyObjects[session].speed[1] / 180]);
+                    beyObjects[session].position = beyObjects[session].position.add([beyObjects[session].speed[0] / 180 * beyObjects[session].bounds.width / 30, beyObjects[session].speed[1] / 180 * beyObjects[session].bounds.width / 30]);
                     beyObjects[session].scale(0.95);
                     if (beyObjects[session].bounds.width < 1) {
                         beyObjects[session].remove();
