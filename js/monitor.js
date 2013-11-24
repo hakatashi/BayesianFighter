@@ -146,8 +146,13 @@ $(function () {
                     console.log('called');
                 }
                 if (beyObjects[session].dead) {
+                    var elapsedTime = ((new Date) - setupTime) / 1000;
+                    var destAngle = Math.sin(elapsedTime / 2) * 500 - elapsedTime * 2000;
+                    
+                    beyObjects[session].rotate(destAngle - beyObjects[session].angle);
+                    beyObjects[session].angle = destAngle;
                     beyObjects[session].position = beyObjects[session].position.add([beyObjects[session].speed[0] / 180, beyObjects[session].speed[1] / 180]);
-                    beyObjects[session].scale((beyObjects[session].bounds.width - 1) / beyObjects[session].bounds.width);
+                    beyObjects[session].scale(0.95);
                     if (beyObjects[session].bounds.width < 1) {
                         beyObjects[session].remove();
                         delete beyObjects[session];
