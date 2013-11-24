@@ -25,6 +25,8 @@ $(function () {
     var SVGcache = {};
 
     var beyObjects = {};
+    
+    var emergeEffects = [];
 
     var project = new paper.Project(canvas);
 
@@ -117,8 +119,8 @@ $(function () {
                     if (bey.isCPU == true) {
                         baseColor.saturation = 0;
                         designColor.saturation = 0;
-                        baseColor.brightness = Math.max(baseColor.brightness - 0.4, 0);
-                        designColor.brightness = Math.max(designColor.brightness - 0.4, 0);
+                        baseColor.brightness = Math.max((baseColor.brightness - 0.6) * 2, 0);
+                        designColor.brightness = Math.max(designColor.brightness - 0.6, 0);
                     }
 
                     baseGroup.fillColor = new paper.Color(baseColor);
@@ -126,6 +128,12 @@ $(function () {
 
                     beyObjects[bey.session] = beyObject;
                     beyObjects[bey.session].called = true;
+                    
+                    var emergeEffect = new paper.Path.Circle(beyObject.position, 30);
+                    emergeEffect.strokeColor = 'blue';
+                    emergeEffect.strokeWidth = 5;
+                    
+                    emergeEffects.push(emergeEffect);
                 }
             })
 
@@ -135,6 +143,12 @@ $(function () {
                     delete beyObjects[session];
                 }
             }
+            
+            emergeEffects.forEach( function (emergeEffect) {
+                emergeEffect.strokeColor.alpha -= 0.05;
+                emergeEffect.scale(1.06);
+                if (emergeEffect.strokeColor.alpha <= 0) emergeEffect.remove();
+            });
 
             paper.view.draw();
             drawFPS++;
