@@ -92,6 +92,7 @@ $(function () {
                     beyObjects[bey.session].called = true;
                     beyObjects[bey.session].rotate(destAngle - beyObjects[bey.session].angle);
                     beyObjects[bey.session].angle = destAngle;
+                    beyObjects[bey.session].speed = bey.speed;
                 } else {
                     var beyObject = project.importSVG(SVGcache['/img/bey01.svg']);
                     var baseGroup = beyObject.children['base'];
@@ -100,6 +101,8 @@ $(function () {
                     beyObject.position = beyLocate.add(paper.view.center);
                     beyObject.scale(bey.size / 150);
                     beyObject.angle = 0; // custom property
+                    beyObject.dead = false; // custom property
+                    beyObject.speed = bey.speed; //custom property
 
                     Math.seedrandom(bey.session);
                     var mainColor = new paper.Color({ 'hue': Math.random() * 360, 'saturation': 0.6 + Math.random() * 0.4, 'brightness': 0.6 + Math.random() * 0.4 });
@@ -138,9 +141,18 @@ $(function () {
             })
 
             for (var session in beyObjects) {
-                if (beyObjects[session].called == false) {
-                    beyObjects[session].remove();
-                    delete beyObjects[session];
+                if (beyObjects[session].called == false && !beyObjects[session].dead) {
+                    beyObjects[session].dead = true;
+                    console.log('called');
+                }
+                if (beyObjects[session].dead) {
+                    beyObjects[session].position = beyObjects[session].position.add([beyObjects[session].speed[0] / 180, beyObjects[session].speed[1] / 180]);
+                    beyObjects[session].scale((beyObjects[session].bounds.width - 1) / beyObjects[session].bounds.width);
+                    if (beyObjects[session].bounds.width < 1) {
+                        beyObjects[session].remove();
+                        delete beyObjects[session];
+                        console.log('removed');
+                    }
                 }
             }
             
