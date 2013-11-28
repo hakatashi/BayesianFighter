@@ -1,0 +1,32 @@
+{
+  "name": "BayesianFighter",
+  "version": "0.0.0",
+  "description": "Interactive Online Japanese Beigoma Battle Game. This game was developed toward Komaba Festival 2013 of the University of Tokyo.",
+  "main": "serve.js",
+  "dependencies": {
+    "box2dnode": "~2.0.0",
+    "socket.io": "~0.9.16"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node serve.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hakatashi/BayesianFighter.git"
+  },
+  "keywords": [
+    "node.js",
+    "Socket.IO",
+    "WebSocket",
+    "accelerometer",
+    "smart phone",
+    "game"
+  ],
+  "author": "hakatashi",
+  "license": "CC0 1.0 Universal",
+  "bugs": {
+    "url": "https://github.com/hakatashi/BayesianFighter/issues"
+  }
+}
