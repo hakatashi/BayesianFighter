@@ -3,15 +3,31 @@ BayesianFighter
 
 2013年度東京大学駒場祭のTSGの展示企画で使用したプログラムです。
 
-This is a game program exhibited in TSG booth at the 64th Komaba Festival of the University of Tokyo on Nov 22-24, 2012.
+This game program was exhibited in TSG booth at the 64th Komaba Festival of the University of Tokyo on Nov 22-24, 2013.
 
 大したDoS対策をしてないので間違っても実際の運用で使用しないでください。
 
 As it lacks measures to guard you against DoS attacks, you can never run this program for real operations.
 
+# What's this?
+
+オンライン参加型のリアルタイムベイゴマゲームです。スマートフォンを傾けて自分のベイゴマを操作し、できるだけ多くの敵をステージから落とすのが目標です。
+
+プログラムを起動すると、`http://hostname/`でスマートフォンからアクセスするコントロール画面を、`http://hostname/monitor`で展示画面からアクセスするモニター画面を提供します。
+
+モニタ画面に表示されるステージには常時数個のコンピューター(灰色で表示)が存在し、互いに蹴落とし合う激しいバトルを繰り広げます。
+
+スマートフォンからコントロール画面にアクセスするとわかりやすい導入画面が表示され、向き判定の手順を踏むように指示されたあと、ゲームに参加できるようになります。
+
+ゲームに参加すると手元に表示されてるベイと同じ色のベイがモニタ画面に出現し、スマホを傾けて操作できるようになります。(コントロール画面にステージは表示されません。手元は見ずにモニター画面を見ながら操作します。)
+
 # How to...
 
 ## Install
+
+node.jsをインストールし、以下を実行
+
+Install node.js, and execute following:
 
     npm install
 
@@ -21,11 +37,11 @@ As it lacks measures to guard you against DoS attacks, you can never run this pr
 
 # License
 
-`LICENSE`をご覧ください。
+CC0 1.0 Universal のもとで一切の著作権を放棄します。`LICENSE`をご覧ください。
 
-Read `LICENSE`.
+I will dedicate all copyright under CC0 1.0 Universal. Read `LICENSE`.
 
-# Acknowledgement
+# Acknowledgements
 
 このプログラムでは[Google Hosted Libraries](https://developers.google.com/speed/libraries/)および[cdnjs](http://cdnjs.com/)によるスクリプトホスティングを利用しています。
 
