@@ -39,7 +39,7 @@ Install node.js, and execute following:
 
 CC0 1.0 Universal のもとで一切の著作権を放棄します。`LICENSE`をご覧ください。
 
-I will dedicate all copyright under CC0 1.0 Universal. Read `LICENSE`.
+I dedicate all copyright under CC0 1.0 Universal. Read `LICENSE`.
 
 # Acknowledgements
 
