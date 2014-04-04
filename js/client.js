@@ -1,5 +1,5 @@
 $(function () {
-    var socket = io.connect('http://' + location.host + '/send');
+    var socket = io.connect('http://' + location.host + '/hakatashi/BayesianFighter/send');
     var socketid;
 
     var canvas = document.getElementById('Canvas');

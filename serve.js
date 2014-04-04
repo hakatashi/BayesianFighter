@@ -1,5 +1,7 @@
 var app = require('http').createServer(handler);
-var io = require('socket.io').listen(app);
+var io = require('socket.io').listen(app, {
+	resource: '/hakatashi/BayesianFighter/socket.io'
+});
 var fs = require('fs');
 var path = require('path');
 
@@ -162,7 +164,7 @@ var writeFromFile = function (req, res, locate) {
     });
 }
 
-app.listen(8080);
+app.listen(80);
 
 io.set('log level', 1);
 
