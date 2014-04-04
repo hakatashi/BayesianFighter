@@ -1,3 +1,7 @@
 node_modules
 memo
 js/paper.min.js
+*.swp
+*~
+*.log
+
