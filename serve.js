@@ -1,6 +1,8 @@
+var listenPath = '/hakatashi/BayesianFighter';
+
 var app = require('http').createServer(handler);
 var io = require('socket.io').listen(app, {
-	resource: '/hakatashi/BayesianFighter/socket.io'
+	resource: listenPath + '/socket.io'
 });
 var fs = require('fs');
 var path = require('path');
@@ -171,9 +173,12 @@ io.set('log level', 1);
 //必要なファイルを提供
 function handler (req, res) {
     var urlinfo = require('url').parse(req.url, true);
-    if (urlinfo.pathname === "/") writeFromFile(req, res, "/index.html");
-    else if (urlinfo.pathname === "/monitor") writeFromFile(req, res, "/monitor.html");
-    else if (allowedAccesses.indexOf(urlinfo.pathname) >= 0) writeFromFile(req, res, urlinfo.pathname);
+	if (urlinfo.pathname.substring(0, listenPath.length) === listenPath) {
+		var path = urlinfo.pathname.substring(listenPath.length);
+		if (path === "/") writeFromFile(req, res, "/index.html");
+		else if (path === "/monitor") writeFromFile(req, res, "/monitor.html");
+		else if (allowedAccesses.indexOf(path) >= 0) writeFromFile(req, res, path);
+	}
 }
 
 //接続時処理

@@ -1,5 +1,7 @@
 $(function () {
-    var socket = io.connect('http://' + location.host + '/hakatashi/BayesianFighter/monitor');
+    var socket = io.connect('http://' + location.host + '/monitor', {
+		resource: 'hakatashi/BayesianFighter/socket.io'
+	});
 
     var canvas = document.getElementById('Canvas');
     paper.setup(canvas);
@@ -21,7 +23,7 @@ $(function () {
 
     var beys = [];
 
-    var SVGURLs = ['/img/bey01.svg', '/img/img01.svg'];
+    var SVGURLs = ['img/bey01.svg', 'img/img01.svg'];
     var SVGcache = {};
 
     var beyObjects = {};
@@ -94,7 +96,7 @@ $(function () {
                     beyObjects[bey.session].angle = destAngle;
                     beyObjects[bey.session].speed = bey.speed;
                 } else {
-                    var beyObject = project.importSVG(SVGcache['/img/bey01.svg']);
+                    var beyObject = project.importSVG(SVGcache['img/bey01.svg']);
                     var baseGroup = beyObject.children['base'];
                     var designGroup = beyObject.children['design'];
 

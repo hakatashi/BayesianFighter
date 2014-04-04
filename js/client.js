@@ -1,5 +1,7 @@
 $(function () {
-    var socket = io.connect('http://' + location.host + '/hakatashi/BayesianFighter/send');
+    var socket = io.connect('http://' + location.host + '/send', {
+		resource: 'hakatashi/BayesianFighter/socket.io'
+	});
     var socketid;
 
     var canvas = document.getElementById('Canvas');
@@ -8,7 +10,7 @@ $(function () {
 
     var project = new paper.Project(canvas);
 
-    var SVGURLs = ['/img/bey01.svg', '/img/img01.svg'];
+    var SVGURLs = ['img/bey01.svg', 'img/img01.svg'];
     var SVGcache = {};
 
     var FPStext = new paper.PointText(new paper.Point(10, 20));
@@ -45,7 +47,7 @@ $(function () {
     var setup = function () {
         nowLoadingText.remove();
 
-        beyGroup = project.importSVG(SVGcache['/img/bey01.svg']);
+        beyGroup = project.importSVG(SVGcache['img/bey01.svg']);
         beyGroup.position = paper.view.center;
         beyGroup.angle = 0; //custom property
         beyGroup.scale(Math.min(paper.view.size.width, paper.view.size.height) * 0.9 / 300);
