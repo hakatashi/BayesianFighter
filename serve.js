@@ -99,8 +99,6 @@ function createBey(session, size) {
 function removeBey(session) {
     for (i = 0; i < beyList.length; i++) {
         if (session == beyList[i].session) {
-            console.log(session);
-            console.log(clients[session]);
             if (!(beyList[i].isCPU)) {
                 clients[session].emit('dead', JSON.stringify({
                     'surviveTime': (frame - beyList[i].emergeTime) / worldFPS,
@@ -153,7 +151,6 @@ var writeFromFile = function (req, res, locate) {
             });
             res.write('Error loading ' + locate);
             res.end();
-            console.log("not found " + locate);
             return;
         }
 
@@ -162,7 +159,6 @@ var writeFromFile = function (req, res, locate) {
         });
         res.write(data);
         res.end();
-        console.log("served " + locate);
     });
 }
 
@@ -185,58 +181,58 @@ function handler (req, res) {
 
 //センダー
 io.of('/send').on('connection', function (socket) {
-    console.log('sender: ' + socket.id + ': connected');
+    // console.log('sender: ' + socket.id + ': connected');
     //クライアントにidを送信
     socket.emit('establish', JSON.stringify({ 'id': socket.id }));
     //汎用メッセージ
     socket.on('info', function (message) {
-        console.log('sender: ' + socket.id + ': ' + JSON.stringify(message));
+        // console.log('sender: ' + socket.id + ': ' + JSON.stringify(message));
     });
     //出現リクエスト
     socket.on('emerge', function (message) {
-        console.log('sender: ' + socket.id + ': emerge request: ' + JSON.stringify(message));
+        // console.log('sender: ' + socket.id + ': emerge request: ' + JSON.stringify(message));
         if (createBey(socket.id, 30)) {
-            console.log('sender: ' + socket.id + ': emerge request accepted: ' + JSON.stringify(message));
+            // console.log('sender: ' + socket.id + ': emerge request accepted: ' + JSON.stringify(message));
             clients[socket.id] = socket;
             socket.emit('responce', JSON.stringify(true));
         } else {
-            console.log('sender: ' + socket.id + ': emerge request denied: ' + JSON.stringify(message));
+            // console.log('sender: ' + socket.id + ': emerge request denied: ' + JSON.stringify(message));
             socket.emit('responce', JSON.stringify(false));
         }
     });
     //消去リクエスト
     socket.on('exit', function (message) {
-        console.log('sender: ' + socket.id + ': exit request: ' + JSON.stringify(message));
+        // console.log('sender: ' + socket.id + ': exit request: ' + JSON.stringify(message));
         if (removeBey(socket.id)) {
-            console.log('sender: ' + socket.id + ': exit request accepted: ' + JSON.stringify(message));
+            // console.log('sender: ' + socket.id + ': exit request accepted: ' + JSON.stringify(message));
             socket.emit('responce', true);
         } else {
-            console.log('sender: ' + socket.id + ': exit request denied: ' + JSON.stringify(message));
+            // console.log('sender: ' + socket.id + ': exit request denied: ' + JSON.stringify(message));
             socket.emit('responce', false);
         }
     });
     //センサ情報の更新
     socket.on('sensor', function (sensor) {
-        //console.log('sender: ' + socket.id + ': recieved sensor info: ' + JSON.stringify(sensor));
+        // console.log('sender: ' + socket.id + ': recieved sensor info: ' + JSON.stringify(sensor));
         updateSensorInfo(socket.id, JSON.parse(sensor));
     })
     //切断
     socket.on('disconnect', function () {
-        console.log('sender: ' + socket.id + ': disconnected');
+        // console.log('sender: ' + socket.id + ': disconnected');
         removeBey(socket.id);
     });
 });
 
 //モニター
 io.of('/monitor').on('connection', function (socket) {
-    console.log('monitor: ' + socket.id + ': connected');
+    // console.log('monitor: ' + socket.id + ': connected');
     //汎用メッセージ
     socket.on('info', function (message) {
-        //console.log('monitor: ' + socket.id + ': ' + JSON.stringify(message));
+        // console.log('monitor: ' + socket.id + ': ' + JSON.stringify(message));
     });
     //切断
     socket.on('disconnect', function () {
-        console.log('monitor: ' + socket.id + ': disconnected');
+        // console.log('monitor: ' + socket.id + ': disconnected');
     });
 });
 
@@ -369,7 +365,7 @@ var cpuThink = function () {
 //モニタに送信
 var sendToMonitor = function () {
     io.of('/monitor').emit('StageInfo', beyList);
-    //console.log('sent to monitor: ' + JSON.stringify(beyList));
+    // console.log('sent to monitor: ' + JSON.stringify(beyList));
 }
 
 //起動
