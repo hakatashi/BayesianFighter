@@ -162,7 +162,7 @@ var writeFromFile = function (req, res, locate) {
     });
 }
 
-app.listen(80);
+app.listen(8080);
 
 io.set('log level', 1);
 
