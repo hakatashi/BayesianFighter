@@ -1,6 +1,6 @@
 $(function () {
     var socket = io.connect('http://' + location.host + '/send', {
-		resource: 'hakatashi/BayesianFighter/socket.io'
+		resource: 'socket.io'
 	});
     var socketid;
 

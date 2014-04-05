@@ -1,4 +1,4 @@
-var listenPath = '/hakatashi/BayesianFighter';
+var listenPath = '';
 
 var app = require('http').createServer(handler);
 var io = require('socket.io').listen(app, {
