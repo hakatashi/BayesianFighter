@@ -192,7 +192,7 @@ $(function () {
         connectText[0].point = infoWindow.center.add([0, -250]);
         connectText[0].fontSize = 20;
 
-        var img01 = project.importSVG(SVGcache['/img/img01.svg']);
+        var img01 = project.importSVG(SVGcache['img/img01.svg']);
         img01.fillColor = 'white';
         img01.scale(350 / 600);
         img01.position = infoWindow.center.add([0, -30]);
