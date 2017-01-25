@@ -1,6 +1,8 @@
 BayesianFighter
 ===============
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/hakatashi/BayesianFighter.svg)](https://greenkeeper.io/)
+
 2013年度東京大学駒場祭のTSGの展示企画で使用したプログラムです。
 
 This game program was exhibited in TSG booth at the 64th Komaba Festival of the University of Tokyo on Nov 22-24, 2013.
